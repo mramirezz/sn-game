@@ -1,0 +1,143 @@
+/* Los instrumentos y el cuaderno: paneles encima del escenario. Todo va dentro de .panel-juego para no tocar el escenario. */
+:root {
+  --fondo: #0b1020;
+  --panel: #141b33;
+  --panel2: #1b2445;
+  --borde: #2c3866;
+  --texto: #e8ecf8;
+  --tenue: #9aa6c8;
+  --ambar: #ffb84d;
+  --cian: #5ad1ff;
+  --verde: #6ee7a0;
+  --rojo: #ff6b6b;
+  --violeta: #b48cff;
+  --gris: #7f8bb3;
+  --pixel: 'Pixel', ui-monospace, monospace;
+  --cuerpo: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* tipos de supernova (Ia, II, IIn...) con serifas, como números romanos: en letra sin serifas "Ia" se lee "la" */
+.tipo { font-family: 'Noto Serif', Georgia, 'Times New Roman', serif; font-style: normal; }
+
+.panel-juego { position: fixed; inset: 6px; z-index: 4; display: flex; flex-direction: column;
+  background: #080a16; border: 2px solid #c9b48a; box-shadow: 0 0 0 2px #000, inset 0 0 0 1px #3a2a1a;
+  color: var(--texto); font: clamp(15px, 0.35vw + 13.5px, 17px)/1.55 var(--cuerpo); -webkit-user-select: text; user-select: text; }
+.panel-juego[hidden] { display: none; }
+.panel-juego .cabeza { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 2px solid #6a5a3a; background: rgba(20,14,10,.95); }
+.panel-juego .titulo { flex: 1; font-family: var(--pixel); font-size: 11px; color: var(--ambar); line-height: 1.5; }
+.panel-juego .contenido { flex: 1; overflow-y: auto; padding: 10px max(12px, calc((100% - 1040px) / 2)) 12px; -webkit-overflow-scrolling: touch; } /* en pantallas anchas, el texto no pasa de 1040 px */
+#cuaderno { z-index: 5; }
+/* con un diálogo abierto, el panel se acorta y termina justo encima de la caja: el diálogo nunca tapa lo que explica el instrumento */
+body.con-dialogo .panel-juego { bottom: calc(var(--alto-caja, 110px) + 20px); }
+
+.panel-juego * { box-sizing: border-box; }
+.panel-juego button { font: inherit; color: var(--texto); background: var(--panel2); border: 2px solid var(--borde); padding: .45em .9em; cursor: pointer; }
+.panel-juego button:hover:not(:disabled) { border-color: var(--ambar); }
+.panel-juego button:disabled { opacity: .45; cursor: not-allowed; }
+.panel-juego button.primario { background: var(--ambar); color: #1a1205; border-color: var(--ambar); font-weight: 700; }
+.panel-juego button.grande { padding: .9em 1.2em; touch-action: none; }
+.panel-juego a { color: var(--cian); }
+.panel-juego h1, .panel-juego h2, .panel-juego h3 { font-family: var(--pixel); font-weight: 400; line-height: 1.5; }
+.panel-juego h1 { font-size: 1.05rem; color: var(--ambar); }
+.panel-juego h2 { font-size: .85rem; color: var(--ambar); margin-top: 1.6rem; }
+.panel-juego h3 { font-size: .7rem; color: var(--cian); }
+.panel-juego p { max-width: 70ch; }
+.panel-juego .tenue { color: var(--tenue); }
+.panel-juego .juego-marca { font-size: .75rem; color: var(--violeta); border: 1px dashed var(--violeta); padding: 0 .4em; white-space: nowrap; }
+
+.panel-juego .panel { background: var(--panel); border: 2px solid var(--borde); padding: .8rem 1rem; margin: .8rem 0; }
+.panel-juego .fila { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; margin: .6rem 0; }
+.panel-juego .grilla2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.panel-juego .grilla3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+
+.panel-juego canvas { display: block; width: 100%; background: #080c1a; border: 2px solid var(--borde); }
+.panel-juego canvas.vista { aspect-ratio: 16 / 10; width: min(100%, 720px); margin: 0 auto; background: #02030a; border-color: #6a5a3a; }
+.panel-juego canvas.vista.campo { aspect-ratio: 16 / 9; border-color: var(--borde); }
+@media (max-width: 600px) { .panel-juego canvas.vista.alto { aspect-ratio: 4 / 5; } } /* en el celular vertical, los dos paneles uno sobre otro */
+.panel-juego .pie { font-size: .85rem; text-align: center; margin: .3rem auto .6rem; }
+.panel-juego .cT { color: var(--cian) !important; }
+.panel-juego canvas.grafico { height: 240px; }
+.panel-juego canvas.franja { height: 70px; }
+
+.panel-juego .marcador { justify-content: center; font-family: var(--pixel); font-size: 10px; }
+.panel-juego .cuenta { font-family: var(--pixel); font-size: 11px; line-height: 2; text-align: center; }
+.panel-juego .cuenta div { opacity: 0; transition: opacity .4s; }
+.panel-juego .cuenta div.si { opacity: 1; }
+.panel-juego .cuenta b { color: var(--ambar); font-weight: 400; }
+.panel-juego .premio { border-color: var(--verde); color: var(--verde); font-family: var(--pixel); font-size: 10px; line-height: 2; text-align: center; }
+.panel-juego .premio a { font-family: var(--cuerpo); font-size: 14px; }
+.panel-juego .contrato { border-color: #6a5a3a; }
+.panel-juego .leccion { display: flex; gap: 1rem; align-items: flex-start; border-color: #6a5a3a; }
+.panel-juego .leccion .quien { font-family: var(--pixel); font-size: .6rem; color: var(--ambar); min-width: 8ch; padding-top: .3em; }
+.panel-juego .leccion p { margin: .2em 0; }
+
+.panel-juego .ecuacion { background: var(--panel2); border-left: 4px solid var(--ambar); padding: .6rem .8rem; overflow-x: auto; font-size: 1.05rem; }
+.panel-juego .etiqueta { font-size: .75rem; color: var(--tenue); font-family: ui-monospace, monospace; }
+
+.panel-juego label.control { display: grid; grid-template-columns: 11ch 1fr 9ch; gap: .6rem; align-items: center; margin: .4rem 0; }
+.panel-juego label.control input { width: 100%; accent-color: var(--ambar); }
+.panel-juego label.control output { text-align: right; font-variant-numeric: tabular-nums; }
+.panel-juego .dato { font-variant-numeric: tabular-nums; }
+.panel-juego .dato b { color: var(--ambar); font-weight: 600; }
+.panel-juego .aviso { color: var(--rojo); }
+
+.panel-juego .veredicto { font-family: var(--pixel); font-size: .75rem; line-height: 1.7; padding: .8rem 1rem; border: 2px solid; }
+.panel-juego .veredicto.ok { color: var(--verde); border-color: var(--verde); }
+.panel-juego .veredicto.mal { color: var(--rojo); border-color: var(--rojo); }
+.panel-juego .veredicto.medio { color: var(--ambar); border-color: var(--ambar); }
+
+.panel-juego .leyenda { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .85rem; color: var(--tenue); }
+.panel-juego .leyenda i { display: inline-block; width: .8em; height: .8em; margin-right: .3em; vertical-align: -1px; }
+
+.panel-juego table.tabla { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.panel-juego table.tabla td, .panel-juego table.tabla th { padding: .3rem .6rem; border-bottom: 1px solid var(--borde); text-align: left; }
+
+.panel-juego .arbol { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
+.panel-juego .nodo { font-size: .8rem; padding: .25em .6em; border: 1px solid var(--borde); color: var(--gris); }
+.panel-juego button.nodo { font-size: .8rem; padding: .3em .7em; background: rgba(110,231,160,.08); } /* los desbloqueados se tocan para ir a su página */
+.panel-juego button.nodo:hover { background: rgba(110,231,160,.2); }
+.panel-juego .nodo.si { border-color: var(--verde); color: var(--verde); }
+.panel-juego .pagina table.tabla td, .panel-juego .pagina table.tabla th { border-bottom-color: #c9bfa6; }
+.panel-juego .pagina { background: #f4efe2; color: #1d1d1d; padding: 1.2rem 1.4rem; margin: 1rem 0; border: 2px solid var(--borde); }
+.panel-juego .pagina h2 { color: #8a4b00; margin-top: 0; }
+.panel-juego .pagina .ecuacion { background: #ebe4d2; border-left-color: #8a4b00; }
+.panel-juego .pagina .etiqueta, .panel-juego .pagina .tenue { color: #555; }
+.panel-juego .pagina .ejemplo { background: #fff8e6; border: 1px dashed #b07a2a; padding: .6rem .8rem; }
+
+@media (max-width: 600px) {
+  .panel-juego label.control { grid-template-columns: 1fr 7ch; }
+  .panel-juego label.control span { grid-column: 1 / -1; }
+  .panel-juego table.tabla { display: block; overflow-x: auto; max-width: 100%; } /* tablas anchas: se desplazan en el teléfono */
+}
+.panel-juego select { max-width: 100%; }
+
+@media print {
+  html, body { overflow: visible !important; height: auto !important; background: #fff !important; }
+  #marco { position: static !important; transform: none !important; width: auto !important; height: auto !important; }
+  body * { visibility: hidden; }
+  #cuaderno, #cuaderno * { visibility: visible; }
+  #cuaderno { position: static; background: #fff; border: none; box-shadow: none; }
+  #cuaderno .contenido { overflow: visible; }
+  #cuaderno .cabeza, .no-imprimir { display: none !important; }
+  .panel-juego .pagina { border: none; break-inside: avoid; }
+}
+
+/* en títulos con letra pixel, los tipos de supernova siguen en la letra del título (la pixel ya tiene serifas) */
+.panel-juego h1 .tipo, .panel-juego h2 .tipo, .panel-juego h3 .tipo, .panel-juego .titulo .tipo, #caja .quien .tipo, .panel-juego .marcador .tipo,
+.panel-juego .cuenta .tipo, .panel-juego .premio .tipo, .panel-juego .veredicto .tipo { font-family: inherit; }
+
+/* cap. 5: el árbitro. La credibilidad es la vida del combate; la tentación brilla para que se note que es una trampa */
+.panel-juego .credibilidad { display: flex; align-items: center; gap: .6rem; margin: .4rem 0; }
+.panel-juego .credibilidad .barra { flex: 1; height: 12px; border: 1px solid var(--borde); background: #1a1018; position: relative; }
+.panel-juego .credibilidad .barra i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #6ee7a0, #ffd166); transition: width .6s; }
+.panel-juego button.tentacion { background: linear-gradient(90deg, #ffd166, #fff3c4, #ffd166); background-size: 200% 100%; color: #2a1a00;
+  border-color: #ffd166; font-weight: 700; animation: brillo 2.4s linear infinite; }
+@keyframes brillo { to { background-position: -200% 0; } }
+.panel-juego .golpe { animation: golpe .35s; }
+@keyframes golpe { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+.panel-juego .libro td { vertical-align: top; font-size: .85rem; }
+.panel-juego .libro td:first-child { white-space: nowrap; color: var(--ambar); }
+.panel-juego canvas.vista.diales { aspect-ratio: auto; height: 230px; }
+@media (max-width: 600px) { .panel-juego canvas.vista.diales { height: 380px; } } /* en el teléfono, dos filas de diales */
+/* el cuaderno se lee como un apunte: los títulos de cada página en letra normal, no pixel */
+.panel-juego .pagina h2 { font-family: var(--cuerpo); font-weight: 700; font-size: 1.25rem; line-height: 1.3; }

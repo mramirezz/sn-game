@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tiempo de control</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="css/instrumento.css?v=11">
+  <style>
+    @font-face { font-family: Pixel; src: url('vendor/fonts/PressStart2P-Regular.ttf'); }
+    @font-face { font-family: 'Pixelify Sans'; font-weight: 400 700; src: url('vendor/fonts/PixelifySans-latin.woff2') format('woff2'); } /* los diálogos: pixel art y legible, con tildes y ñ */
+    html, body { margin: 0; height: 100%; background: #000; color: #e8ecf8; font-family: system-ui, sans-serif; overflow: hidden;
+      touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+    #marco { position: absolute; left: 0; top: 0; } /* lado.js lo centra; sin transform, para que los paneles fijos usen toda la pantalla */
+    #vista { position: absolute; left: 0; top: 0; overflow: hidden; }
+    #mundo { image-rendering: pixelated; display: block; position: absolute; top: 0; left: 0; }
+    .hud { position: absolute; top: 6px; right: 6px; display: flex; gap: 6px; align-items: center; }
+    button.px { font-family: Pixel; font-size: 10px; line-height: 1.4; color: #e8ecf8; background: rgba(8,8,16,.75); border: 2px solid #c9b48a; padding: 6px 8px; }
+    .chip { font-family: Pixel; font-size: 9px; color: #6ee7a0; background: rgba(8,8,16,.7); border: 2px solid #2a5a3a; padding: 5px 6px; }
+    #contador { position: absolute; top: 8px; left: 8px; font-family: Pixel; font-size: 10px; line-height: 1.8; color: #e8d8b0;
+      background: rgba(8,8,16,.7); border: 2px solid #6a5a3a; padding: 4px 8px; max-width: 46%; }
+    #contador b { color: #ffb84d; font-weight: 400; }
+    #marco.vertical #contador { top: 42px; max-width: calc(100% - 16px); } /* en vertical, debajo de los botones */
+    #contador .meta { display: block; color: #ffb84d; }
+    /* el diálogo va abajo, como en los RPG: sobre el escenario al caminar y debajo del instrumento cuando hay uno abierto */
+    #caja { position: absolute; left: 8px; right: 8px; bottom: 8px; display: none; gap: 10px; padding: 10px 12px; z-index: 6;
+      background: linear-gradient(rgba(20,14,10,.96), rgba(10,8,8,.96)); border: 2px solid #c9b48a; box-shadow: 0 0 0 2px #000, inset 0 0 0 1px #3a2a1a; }
+    body.con-panel #caja { position: fixed; bottom: 10px; left: 50%; right: auto; transform: translateX(-50%); width: min(900px, calc(100vw - 20px)); }
+    body.con-panel #contador, body.con-panel .hud { display: none; }
+    #retrato { width: 56px; height: 56px; flex: none; image-rendering: pixelated; border: 2px solid #6a5a3a; background: #120c0a; }
+    #caja .quien { font-family: Pixel; font-size: 10px; margin-bottom: 6px; color: #ffb84d; }
+    #caja .texto { font-family: 'Pixelify Sans', ui-monospace, monospace; font-size: clamp(18px, 0.45vw + 16px, 22px); line-height: 1.3; letter-spacing: .01em; }
+    #caja .sigue { position: absolute; right: 8px; bottom: 4px; font-family: Pixel; font-size: 9px; animation: parpadeo 1s steps(2) infinite; }
+    @keyframes parpadeo { 50% { opacity: 0; } }
+    #negro { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .35s; z-index: 10; }
+    /* pantalla de inicio: el cerro de noche que se acerca despacio, estrellas que titilan y una supernova cada tanto */
+    #titulo { position: absolute; inset: 0; z-index: 8; overflow: hidden; background: #02030a; display: flex; align-items: center; justify-content: center; font-family: Pixel; text-align: center; }
+    #titulo .fondo { position: absolute; inset: -3%; background: url('assets/fondos/cerro.png') 22% center / cover no-repeat; /* en vertical, que se vea el observatorio */ filter: brightness(.55); animation: acerca 40s ease-in-out infinite alternate; }
+    @keyframes acerca { from { transform: scale(1); } to { transform: scale(1.08) translateY(-1.5%); } }
+    #titulo .velo { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0) 0%, rgba(0,0,0,.5) 65%, rgba(0,0,0,.85) 100%); }
+    #cieloTitulo { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #titulo .tit { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px; }
+    #titulo h1 { margin: 0; font-size: clamp(18px, 4.2vw, 30px); line-height: 1.4; color: #ffb84d; font-weight: 400; letter-spacing: .04em;
+      text-shadow: 3px 3px 0 #5a2a00, 0 0 18px rgba(255,184,77,.45); }
+    #titulo .sub { margin: 0 0 12px; font-family: system-ui, sans-serif; font-size: 14px; color: #e8d8b0; }
+    #titulo .menu { display: flex; flex-direction: column; gap: 10px; min-width: 230px; }
+    #titulo .boton { font-size: 11px; padding: 12px 18px; background: rgba(20,14,10,.85); }
+    #titulo .boton:hover, #titulo .boton:focus-visible { border-color: #ffb84d; color: #ffb84d; }
+    #titulo .boton.chico { font-size: 9px; padding: 8px 14px; }
+    #titulo .estado { margin: 4px 0 0; font-family: system-ui, sans-serif; font-size: 13px; color: #c9b48a; min-height: 1em; }
+    #titulo[hidden] { display: none; }
+    #cuaderno { z-index: 9; } /* el cuaderno se puede abrir desde el inicio */
+    /* el aviso de que se puede jugar en horizontal: solo con el teléfono vertical */
+    .girar { display: none; }
+    @media (orientation: portrait) { .girar { display: inline-flex; align-items: center; gap: 6px; } }
+    .aviso-girar { margin: 8px 0 0; font-family: system-ui, sans-serif; font-size: 13px; color: #e8d8b0; }
+    .telefono { display: inline-block; width: 10px; height: 16px; border: 2px solid currentColor; border-radius: 3px; position: relative; }
+    .telefono::after { content: ''; position: absolute; left: 50%; bottom: 1px; width: 2px; height: 2px; margin-left: -1px; background: currentColor; }
+    .telefono.gira { width: 14px; height: 22px; animation: gira 2.4s ease-in-out infinite; }
+    @keyframes gira { 0%, 30% { transform: rotate(0); } 55%, 85% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+  </style>
+</head>
+<body>
+  <div id="marco">
+    <div id="vista"><canvas id="mundo"></canvas></div>
+    <div id="contador"></div>
+    <div class="hud"><span class="chip" id="ciencia">0</span><button class="px" id="abrirCuaderno">Cuaderno</button><button class="px" id="musica">♪ sí</button><button class="px girar" id="girar" title="Jugar en horizontal">⟳ <span class="telefono"></span></button></div>
+    <section class="panel-juego" id="instrumento" hidden>
+      <div class="cabeza"><span class="titulo"></span><button class="px" id="salirInstrumento">✕ Salir</button></div>
+      <div class="contenido"></div>
+    </section>
+    <section class="panel-juego" id="cuaderno" hidden>
+      <div class="cabeza"><span class="titulo">Cuaderno</span><button class="px" id="cerrarCuaderno">✕ Cerrar</button></div>
+      <div class="contenido"></div>
+    </section>
+    <div id="caja"><canvas id="retrato" width="56" height="56"></canvas><div><div class="quien"></div><div class="texto"></div></div><span class="sigue">▼</span></div>
+    <div id="negro"></div>
+    <div id="titulo">
+      <div class="fondo"></div><canvas id="cieloTitulo"></canvas><div class="velo"></div>
+      <div class="tit">
+        <h1>TIEMPO DE CONTROL</h1>
+        <p class="sub">Cuántas supernovas explotan en el universo, y cómo se sabe</p>
+        <div class="menu">
+          <button class="px boton" id="continuar" hidden>Continuar</button>
+          <button class="px boton" id="nueva">Comenzar</button>
+          <button class="px boton chico" id="tituloCuaderno" hidden>Cuaderno</button>
+        </div>
+        <p class="estado" id="tituloEstado"></p>
+        <p class="girar aviso-girar"><span class="telefono gira"></span>También se juega en horizontal: gira el teléfono</p>
+      </div>
+    </div>
+  </div>
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="js/fisica.js?v=11"></script>
+  <script src="js/universo.js?v=11"></script>
+  <script src="js/plot.js?v=11"></script>
+  <script src="js/vista.js?v=11"></script>
+  <script src="js/cuaderno.js?v=11"></script>
+  <script src="data/plantillas.js?v=11"></script>
+  <script src="data/sudare1.js?v=11"></script>
+  <script src="data/tesis.js?v=11"></script>
+  <script src="data/espectro.js?v=11"></script>
+  <script src="js/cuaderno2.js?v=11"></script>
+  <script src="js/poblacion.js?v=11"></script>
+  <script src="js/cosmos.js?v=11"></script>
+  <script src="js/misiones.js?v=11"></script>
+  <script src="js/vista2.js?v=11"></script>
+  <script src="js/escenas.js?v=11"></script>
+  <script src="js/misiones2.js?v=11"></script>
+  <script src="js/cap3.js?v=11"></script>
+  <script src="js/cap4.js?v=11"></script>
+  <script src="js/cap5.js?v=11"></script>
+  <script src="js/cap6.js?v=11"></script>
+  <script src="js/cap7.js?v=11"></script>
+  <script src="assets/sprites/meta.js?v=11"></script>
+  <script src="assets/sprites/astronomo_anim.js?v=11"></script>
+  <script src="js/lado.js?v=11"></script>
+</body>
+</html>
