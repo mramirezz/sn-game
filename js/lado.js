@@ -475,7 +475,7 @@
   }
   function cambiar(dest, x) {
     $('#negro').style.opacity = 1;
-    setTimeout(() => { escena = dest; yo.x = x; yo.meta = null; cam.x = Math.max(0, Math.min(W - cam.ancho, x - cam.ancho / 2)); actualizarContador(); $('#negro').style.opacity = 0; }, 380);
+    setTimeout(() => { escena = dest; yo.x = x; yo.meta = null; const [l0, l1] = ESCENAS[dest].limites; yo.mira = x < (l0 + l1) / 2 ? 1 : -1; ani.prev = null; /* entra mirando hacia adentro de la sala, no hacia la puerta */ cam.x = Math.max(0, Math.min(W - cam.ancho, x - cam.ancho / 2)); actualizarContador(); $('#negro').style.opacity = 0; }, 380);
   }
   function actualizarContador() {
     const objs = visibles(ESCENAS[escena]).filter(o => o.tipo !== 'salida');
