@@ -57,6 +57,7 @@ body.con-dialogo .panel-juego { bottom: calc(var(--alto-caja, 110px) + 20px); }
 .panel-juego .pie { font-size: .85rem; text-align: center; margin: .3rem auto .6rem; }
 .panel-juego .cT { color: var(--cian) !important; }
 .panel-juego canvas.grafico { height: 240px; }
+.panel-juego canvas.grafico.tira { height: 150px; cursor: ew-resize; touch-action: none; } /* la línea de tiempo de 6.1 se arrastra */
 .panel-juego canvas.franja { height: 70px; }
 
 .panel-juego .marcador { justify-content: center; font-family: var(--pixel); font-size: 10px; }

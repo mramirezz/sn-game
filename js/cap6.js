@@ -27,13 +27,14 @@
       <p class="fila"><button id="kroupa" class="primario">${Lg('IMF de Kroupa', 'Kroupa IMF')}</button><button id="salpeter">${Lg('IMF de Salpeter', 'Salpeter IMF')}</button>
         <button class="primario" id="play">${Lg('▶ Que pase el tiempo', '▶ Let time pass')}</button><span class="dato">${Lg('edad de la generación:', 'age of the generation:')} <b id="edad">1 Myr</b></span></p>
       <label class="control"><span>${Lg('β de la DTD', 'DTD β')}</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>
-      <canvas class="vista" id="gen"></canvas>
-      <canvas class="grafico" id="tl"></canvas>
+      <canvas class="vista alto" id="gen"></canvas>
+      <canvas class="grafico tira" id="tl"></canvas>
       <div class="leyenda"><span><i style="background:#5ad1ff"></i>${Lg('CC acumuladas', 'cumulative CC')}</span><span><i style="background:#ffd166"></i>${Lg('Ia acumuladas', 'cumulative Ia')}</span><span><i style="background:#e8ecf8"></i>${Lg('enanas blancas', 'white dwarfs')}</span></div>
       <div id="cuentas"></div>
       <div id="fin"></div>`;
     u.tex($('#ecK', c), String.raw`K_\mathrm{CC} \,=\, \frac{\int_{8}^{40} \phi(m)\,\mathrm{d}m}{\int_{0.1}^{100} m\,\phi(m)\,\mathrm{d}m}, \qquad f(\tau) \,\propto\, \tau^{\beta} \;\;(\tau > 40\,\mathrm{Myr})`);
-    // la muestra de estrellas para dibujar: masas sorteadas de la IMF en número (pdf por log m ∝ m φ(m))
+    // la muestra de estrellas para dibujar: masas sorteadas de la IMF en número (pdf por log m ∝ m φ(m)). Se ordenan por masa:
+    // x es su masa (escala log) e y es al azar, así la densidad de puntos a lo ancho es la IMF misma.
     function estrellas(imf) {
       const lm = Array.from({ length: 301 }, (_, i) => -1 + 3 * i / 300), pdf = lm.map(l => 10 ** l * imf(10 ** l)), cdf = [0];
       for (let i = 1; i < lm.length; i++) cdf.push(cdf[i - 1] + (pdf[i] + pdf[i - 1]) / 2);
@@ -41,12 +42,15 @@
       return Array.from({ length: 1600 }, () => {
         const q = rand() * tot; let i = cdf.findIndex(v => v >= q); i = Math.max(1, i);
         const mm = 10 ** (lm[i - 1] + (lm[i] - lm[i - 1]) * (q - cdf[i - 1]) / Math.max(1e-12, cdf[i] - cdf[i - 1]));
-        const r = Math.sqrt(rand()) * 0.42, a = rand() * 2 * Math.PI;
-        return { m: mm, x: 0.5 + r * Math.cos(a), y: 0.5 + r * Math.sin(a) * 0.85, vida: vida(mm) };
+        return { m: mm, y: rand(), vida: vida(mm) };
       });
     }
     let pobl = estrellas(CO.IMF[imfN]);
-    const destellos = [];
+    const destellos = [], nebulosas = [], LT1 = Math.log10(T0 * 1e9);
+    let tPrev = 10 ** logt / 1e9;
+    // la masa que se apaga a la edad t (Gyr): la inversa de vida(m), la rama de m < 63 M☉ donde el ajuste baja
+    const mTo = t => { const d = 12.96 - 4 * (10 - Math.log10(t * 1e9)); return d < 0 ? Infinity : 10 ** ((3.6 - Math.sqrt(d)) / 2); };
+    const fm = m => (m < 10 ? m.toFixed(1) : m.toFixed(0));
     function cuentas() {
       const imf = CO.IMF[imfN], kcc = CO.kcc(imf), n38 = CO.kcc(imf, 3, 8), nombreT = imfN === 'kroupa' ? 'Kroupa' : 'Salpeter';
       return { kcc, n38, nIa: NM_TESIS, frac: NM_TESIS / n38, tesis: T.sfh.imf[nombreT] };
@@ -56,50 +60,93 @@
       return mMin > 40 ? 0 : CO.kcc(imf, mMin, 40) / tot; };
     const fracIa = t => { if (t <= CO.TAU_MIN) return 0; const b1 = beta + 1, F = x => (Math.abs(b1) < 1e-9 ? Math.log(x) : x ** b1 / b1); return (F(Math.min(t, T0)) - F(CO.TAU_MIN)) / (F(T0) - F(CO.TAU_MIN)); };
     function dibujar(dt) {
-      const t = 10 ** logt / 1e9; // Gyr
-      $('#edad', c).textContent = t < 1e-3 * 999 ? `${(t * 1e3).toFixed(0)} Myr` : `${t.toFixed(2)} Gyr`;
-      // la generación
-      const { g, w, h } = Vista.h.lienzo($('#gen', c));
-      g.fillStyle = '#03040b'; g.fillRect(0, 0, w, h);
+      const t = 10 ** logt / 1e9, edadTxt = t < 0.9995 ? `${(t * 1e3).toFixed(0)} Myr` : `${t.toFixed(2)} Gyr`;
+      $('#edad', c).textContent = edadTxt;
+      // ---- la generación ordenada por masa ----
+      const { g, w, h } = Vista.h.lienzo($('#gen', c)), chico = w < 480, H_ = Vista.h;
+      const yA = h - 66, y0 = chico ? 60 : 54, y1 = yA - 12, xm = m => 16 + (w - 32) * (Math.log10(m) + 1) / 3, ym = s => y0 + s.y * (y1 - y0);
+      const fondo = g.createLinearGradient(0, 0, 0, h); fondo.addColorStop(0, '#080c1e'); fondo.addColorStop(1, '#02030a');
+      g.fillStyle = fondo; g.fillRect(0, 0, w, h);
+      // franjas del destino de cada masa
+      for (const [a, b, rgb] of [[3, 8, '255,209,102'], [8, 40, '90,209,255']]) { g.fillStyle = `rgba(${rgb},0.07)`; g.fillRect(xm(a), y0 - 6, xm(b) - xm(a), y1 - y0 + 12); }
+      // a la derecha del frente ya murieron todas
+      const mf = mTo(t), xf = mf <= 100 ? xm(Math.max(0.1, mf)) : null;
+      if (xf !== null) { g.fillStyle = 'rgba(0,0,0,0.38)'; g.fillRect(xf, y0 - 6, w - 16 - xf, y1 - y0 + 12); }
+      // las de 3 a 8 M☉ que mueren en este paso sueltan su envoltura y quedan como enana blanca
+      if (t > tPrev) for (const s of pobl) if (s.vida > tPrev && s.vida <= t && s.m >= 3 && s.m < 8) nebulosas.push({ s, v: 0 });
+      tPrev = t;
+      g.globalCompositeOperation = 'lighter';
+      for (const s of pobl) if (t < s.vida && s.m > 3) H_.luz(g, xm(s.m), ym(s), 5 + 3 * Math.min(6, Math.sqrt(s.m)), s.m > 8 ? '110,180,255' : '210,225,255', 0.32);
+      g.globalCompositeOperation = 'source-over';
       for (const s of pobl) {
-        const x = s.x * w, y = s.y * h, viva = t < s.vida;
-        if (viva) {
-          const r = Math.min(7, 0.9 + 1.6 * s.m ** 0.45), col = s.m > 8 ? '#9fd8ff' : s.m > 3 ? '#dfefff' : s.m > 1 ? '#fff2c4' : '#ffb07a';
-          g.fillStyle = col; g.globalAlpha = s.m > 3 ? 1 : 0.55; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.globalAlpha = 1;
-          if (s.m > 8) { g.strokeStyle = 'rgba(159,216,255,0.35)'; g.beginPath(); g.arc(x, y, r + 3, 0, 7); g.stroke(); }
-        } else if (s.m < 8) { // enana blanca; las de 3 a 8 M☉ con anillo: pueden ser Ia
-          g.fillStyle = '#e8ecf8'; g.beginPath(); g.arc(x, y, 1.6, 0, 7); g.fill();
-          if (s.m >= 3) { g.strokeStyle = 'rgba(255,209,102,0.6)'; g.beginPath(); g.arc(x, y, 3.5, 0, 7); g.stroke(); }
-        } else if (s.m <= 40) { g.fillStyle = '#3a4060'; g.beginPath(); g.arc(x, y, 1.4, 0, 7); g.fill(); }
+        const x = xm(s.m), y = ym(s);
+        if (t < s.vida) {
+          g.fillStyle = s.m > 8 ? '#9fd8ff' : s.m > 3 ? '#e6f0ff' : s.m > 1 ? '#fff2c4' : '#ffb07a'; g.globalAlpha = s.m > 1 ? 1 : 0.6;
+          g.beginPath(); g.arc(x, y, Math.min(6, 0.8 + 1.4 * s.m ** 0.42), 0, 7); g.fill(); g.globalAlpha = 1;
+        } else if (s.m < 8) { // enana blanca; con anillo si viene de 3 a 8 M☉: puede terminar como Ia
+          g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x, y, 1.5, 0, 7); g.fill();
+          if (s.m >= 3) { g.strokeStyle = 'rgba(255,209,102,0.55)'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, 3.3, 0, 7); g.stroke(); }
+        } else { g.fillStyle = '#4a5578'; g.beginPath(); g.arc(x, y, 1.3, 0, 7); g.fill(); }
       }
-      // destellos: CC (azul) y Ia (amarillo)
+      for (const n of nebulosas) { n.v += dt; const a = Math.max(0, 1 - n.v / 1.2); g.strokeStyle = `rgba(200,230,255,${0.55 * a})`; g.lineWidth = 1; g.beginPath(); g.arc(xm(n.s.m), ym(n.s), 3 + 12 * n.v, 0, 7); g.stroke(); }
+      while (nebulosas.length && nebulosas[0].v > 1.2) nebulosas.shift();
+      // destellos: CC (azul) en la masa que muere ahora, Ia (amarillo) en las enanas blancas
+      g.globalCompositeOperation = 'lighter';
       for (const d of destellos) {
-        d.v += dt;
-        const r = 4 + 40 * d.v, a = Math.max(0, 1 - d.v / 0.8);
-        g.strokeStyle = d.tipo === 'CC' ? `rgba(90,209,255,${a})` : `rgba(255,209,102,${a})`; g.lineWidth = 2.5; g.beginPath(); g.arc(d.x * w, d.y * h, r, 0, 7); g.stroke();
-        g.fillStyle = d.tipo === 'CC' ? `rgba(200,240,255,${a})` : `rgba(255,240,190,${a})`; g.beginPath(); g.arc(d.x * w, d.y * h, 4, 0, 7); g.fill();
+        d.v += dt; const a = Math.min(1, d.v / 0.9), b = 1 - a, rgb = d.tipo === 'CC' ? '90,200,255' : '255,209,102', x = xm(d.m), y = ym(d);
+        H_.luz(g, x, y, (12 + 38 * Math.sqrt(a)) * d.k, rgb, 0.9 * b); H_.luz(g, x, y, (3 + 6 * b) * d.k, '255,255,255', b);
+        g.strokeStyle = `rgba(${rgb},${0.8 * b})`; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, (5 + 26 * a) * d.k, 0, 7); g.stroke();
       }
-      while (destellos.length && destellos[0].v > 0.8) destellos.shift();
-      V2.texto(g, Lg(`IMF de ${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} · ${pobl.length} estrellas dibujadas de una generación`, `${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} IMF · ${pobl.length} stars drawn from one generation`), 10, 16, { tam: 12, color: '#e8ecf8' });
-      // la línea de tiempo: acumuladas por generación
-      const tl = Vista.h.lienzo($('#tl', c)), G = tl.g, W = tl.w, H = tl.h, mg = { i: 44, d: 14, s: 14, a: 30 };
+      g.globalCompositeOperation = 'source-over';
+      while (destellos.length && destellos[0].v > 0.9) destellos.shift();
+      // el frente: la masa que se apaga ahora
+      if (xf !== null) {
+        g.strokeStyle = 'rgba(232,236,248,0.85)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(xf, y0 - 8); g.lineTo(xf, yA); g.stroke();
+        const txt = Lg(`se apagan hoy: las de ${fm(mf)} M☉`, `dying now: stars of ${fm(mf)} M☉`), wt = 7 * txt.length;
+        V2.texto(g, txt, Math.max(16 + wt / 2, Math.min(w - 16 - wt / 2, xf)), y0 - 12, { tam: 11, alin: 'center', color: '#e8ecf8' });
+      }
+      // eje de masas y el destino de cada tramo
+      g.strokeStyle = 'rgba(160,175,210,0.55)'; g.lineWidth = 1; g.beginPath(); g.moveTo(xm(0.1), yA); g.lineTo(xm(100), yA); g.stroke();
+      for (const m of [0.1, 0.3, 1, 3, 8, 40, 100]) {
+        g.beginPath(); g.moveTo(xm(m), yA); g.lineTo(xm(m), yA + 4); g.stroke();
+        if (chico && m === 100) continue; // en el teléfono el 100 choca con el 40: la unidad va al comienzo
+        V2.texto(g, m === 100 ? '100 M☉' : chico && m === 0.1 ? '0.1 M☉' : String(m), xm(m), yA + 15, { tam: 10, alin: m === 100 ? 'right' : m === 0.1 ? 'left' : 'center' });
+      }
+      const tramo = (a, b, col, y) => { g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.moveTo(xm(a) + 2, y); g.lineTo(xm(b) - 2, y); g.stroke(); };
+      tramo(3, 8, '#ffd166', yA + 23); tramo(8, 40, '#5ad1ff', yA + 23); tramo(40, 100, 'rgba(160,175,210,0.5)', yA + 23);
+      V2.texto(g, Lg('8–40 M☉ → CC', '8–40 M☉ → CC'), xm(18), yA + 37, { tam: 11, alin: 'center', color: '#5ad1ff' });
+      V2.texto(g, chico ? Lg('3–8 M☉ → enana blanca → Ia', '3–8 M☉ → white dwarf → Ia') : Lg('3–8 M☉ → enana blanca → unas pocas % son Ia', '3–8 M☉ → white dwarf → a few per cent end as Ia'),
+        xm(5), yA + 53, { tam: 11, alin: 'center', color: '#ffd166' });
+      if (!chico) V2.texto(g, Lg('> 40 M☉: fuera de K_CC', '> 40 M☉: outside K_CC'), xm(100), yA + 53, { tam: 10, alin: 'right' });
+      // arriba: qué se ve, la edad y cuánto ya explotó
+      V2.texto(g, chico ? Lg(`IMF de ${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} · ${pobl.length} estrellas`, `${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} IMF · ${pobl.length} stars`)
+        : Lg(`IMF de ${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} · ${pobl.length} estrellas de una generación, ordenadas por masa`, `${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} IMF · ${pobl.length} stars of one generation, sorted by mass`), 16, 18, { tam: 12, color: '#e8ecf8' });
+      V2.texto(g, `${Lg('edad', 'age')} ${edadTxt}`, w - 16, 19, { tam: 15, alin: 'right', color: '#ffb84d' });
+      const pCC = (100 * fracCC(t)).toFixed(0), pIa = (100 * fracIa(t)).toFixed(0);
+      V2.texto(g, Lg(`CC explotadas: ${pCC} %`, `CC exploded: ${pCC} %`), 16, 37, { tam: 11, color: '#5ad1ff' });
+      V2.texto(g, Lg(`Ia explotadas: ${pIa} %`, `Ia exploded: ${pIa} %`), chico ? w - 16 : 190, 37, { tam: 11, color: '#ffd166', alin: chico ? 'right' : 'left' });
+
+      // ---- la línea de tiempo: lo que ya explotó de la generación; se puede arrastrar ----
+      const tl = H_.lienzo($('#tl', c)), G = tl.g, W = tl.w, H = tl.h, mt = { i: 16, d: 16, s: 24, a: 22 };
       V2.fondo(G, W, H);
-      const px = lt => mg.i + (W - mg.i - mg.d) * (lt - 6) / (Math.log10(T0 * 1e9) - 6), py = f => H - mg.a - (H - mg.s - mg.a) * f;
-      G.strokeStyle = 'rgba(160,175,210,0.5)'; G.beginPath(); G.moveTo(mg.i, mg.s); G.lineTo(mg.i, H - mg.a); G.lineTo(W - mg.d, H - mg.a); G.stroke();
-      for (const [lt, n] of [[6, '1 Myr'], [7, '10 Myr'], [8, '100 Myr'], [9, '1 Gyr'], [10, '10 Gyr']]) V2.texto(G, n, px(lt), H - mg.a + 14, { tam: 10, alin: 'center' });
-      V2.texto(G, '100 %', mg.i - 4, py(1) + 4, { tam: 10, alin: 'right' }); V2.texto(G, '0', mg.i - 4, py(0) + 4, { tam: 10, alin: 'right' });
-      G.strokeStyle = 'rgba(255,209,102,0.5)'; G.setLineDash([4, 4]); G.beginPath(); G.moveTo(px(7.602), mg.s); G.lineTo(px(7.602), H - mg.a); G.stroke(); G.setLineDash([]);
-      V2.texto(G, Lg('40 Myr: empiezan las Ia', '40 Myr: the Ia start'), px(7.602) + 4, mg.s + 10, { tam: 10, color: '#ffd166' });
-      for (const [fn, col] of [[fracCC, '#5ad1ff'], [fracIa, '#ffd166']]) {
-        G.strokeStyle = col; G.lineWidth = 2.5; G.beginPath();
-        for (let lt = 6; lt <= Math.log10(T0 * 1e9); lt += 0.02) { const f = fn(10 ** lt / 1e9); lt === 6 ? G.moveTo(px(lt), py(f)) : G.lineTo(px(lt), py(f)); }
-        G.stroke();
+      const px = lt => mt.i + (W - mt.i - mt.d) * (lt - 6) / (LT1 - 6), py = f => H - mt.a - (H - mt.s - mt.a) * f, xP = px(logt);
+      G.strokeStyle = 'rgba(160,175,210,0.18)'; G.setLineDash([2, 4]); G.beginPath(); G.moveTo(px(6), py(1)); G.lineTo(px(LT1), py(1)); G.stroke(); G.setLineDash([]);
+      V2.texto(G, '100 %', px(6), py(1) - 4, { tam: 9 });
+      for (const [fn, rgb] of [[fracCC, '90,209,255'], [fracIa, '255,209,102']]) {
+        const linea = () => { G.beginPath(); for (let lt = 6; lt <= LT1 + 1e-9; lt += 0.02) { const x = px(lt), y = py(fn(10 ** lt / 1e9)); lt === 6 ? G.moveTo(x, y) : G.lineTo(x, y); } };
+        const area = () => { linea(); G.lineTo(px(LT1), py(0)); G.lineTo(px(6), py(0)); G.closePath(); };
+        area(); G.fillStyle = `rgba(${rgb},0.05)`; G.fill(); linea(); G.strokeStyle = `rgba(${rgb},0.3)`; G.lineWidth = 1.5; G.stroke(); // lo que falta
+        G.save(); G.beginPath(); G.rect(0, 0, xP, H); G.clip(); // lo ya vivido
+        area(); G.fillStyle = `rgba(${rgb},0.25)`; G.fill(); linea(); G.strokeStyle = `rgb(${rgb})`; G.lineWidth = 2.5; G.stroke(); G.restore();
       }
-      G.strokeStyle = '#e8ecf8'; G.lineWidth = 1.5; G.beginPath(); G.moveTo(px(logt), mg.s); G.lineTo(px(logt), H - mg.a); G.stroke();
-      // la lectura en el hueco entre la meseta azul y la curva amarilla, en dos líneas cortas para que no tape las curvas
-      const pCC = (100 * fracCC(t)).toFixed(0), pIa = (100 * fracIa(t)).toFixed(0), xl = px(7.75);
-      V2.texto(G, Lg(`CC explotadas: ${pCC} %`, `CC exploded: ${pCC} %`), xl, py(0.84), { tam: 11, color: '#5ad1ff' });
-      V2.texto(G, Lg(`Ia explotadas: ${pIa} %`, `Ia exploded: ${pIa} %`), xl, py(0.74), { tam: 11, color: '#ffd166' });
+      G.strokeStyle = 'rgba(160,175,210,0.5)'; G.lineWidth = 1; G.beginPath(); G.moveTo(px(6), py(0)); G.lineTo(px(LT1), py(0)); G.stroke();
+      for (const [lt, n] of [[6, '1 Myr'], [7, '10 Myr'], [8, '100 Myr'], [9, '1 Gyr'], [10, '10 Gyr']]) V2.texto(G, n, px(lt), H - 6, { tam: 10, alin: lt === 6 ? 'left' : 'center' });
+      G.strokeStyle = 'rgba(255,209,102,0.5)'; G.setLineDash([3, 4]); G.beginPath(); G.moveTo(px(7.602), py(1)); G.lineTo(px(7.602), py(0)); G.stroke(); G.setLineDash([]);
+      V2.texto(G, Lg('40 Myr: empiezan las Ia', '40 Myr: the Ia begin'), px(7.602) + 4, mt.s - 9, { tam: 10, color: '#ffd166' });
+      if (W >= 480) V2.texto(G, Lg('arrastra para mover el tiempo ↔', 'drag to move time ↔'), W - mt.d, mt.s - 9, { tam: 10, alin: 'right', color: 'rgba(210,220,240,0.6)' });
+      G.globalCompositeOperation = 'lighter'; H_.luz(G, xP, py(0.5), 30, '255,184,77', 0.22); G.globalCompositeOperation = 'source-over';
+      G.strokeStyle = '#ffb84d'; G.lineWidth = 2; G.beginPath(); G.moveTo(xP, py(1) - 4); G.lineTo(xP, py(0)); G.stroke();
+      G.fillStyle = '#ffb84d'; G.beginPath(); G.arc(xP, py(0), 5, 0, 7); G.fill();
     }
     function textoCuentas() {
       const k = cuentas();
@@ -117,6 +164,15 @@
     $('#beta', c).oninput = e => { beta = +e.target.value; $('#ob', c).textContent = beta.toFixed(2); };
     $('#ob', c).textContent = beta.toFixed(2);
     $('#play', c).onclick = () => { if (logt >= Math.log10(T0 * 1e9) - 0.01) logt = 6; jugando = !jugando; $('#play', c).textContent = jugando ? Lg('❚❚ Pausa', '❚❚ Pause') : Lg('▶ Que pase el tiempo', '▶ Let time pass'); };
+    const tlc = $('#tl', c);
+    const arrastrar = e => {
+      const r = tlc.getBoundingClientRect();
+      logt = Math.max(6, Math.min(LT1, 6 + (LT1 - 6) * (e.clientX - r.left - 16) / Math.max(1, r.width - 32)));
+      if (jugando) { jugando = false; $('#play', c).textContent = Lg('▶ Que pase el tiempo', '▶ Let time pass'); }
+      if (logt >= LT1 - 0.01 && !llegoFin) { llegoFin = true; terminar(); }
+    };
+    tlc.addEventListener('pointerdown', e => { tlc.setPointerCapture(e.pointerId); arrastrar(e); });
+    tlc.addEventListener('pointermove', e => { if (e.buttons) arrastrar(e); });
     u.animar((dt, ts) => {
       if (jugando) {
         const t1 = 10 ** logt / 1e9, lt2 = Math.min(Math.log10(T0 * 1e9), logt + dt * 0.33), t2 = 10 ** lt2 / 1e9;
@@ -124,7 +180,10 @@
         const nCC = 1e5 * CO.kcc(CO.IMF[imfN]) * (fracCC(t2) - fracCC(t1)), nIa = 1e5 * NM_TESIS * (fracIa(t2) - fracIa(t1));
         for (const [n, tipo] of [[nCC, 'CC'], [nIa, 'Ia']]) {
           let k = Math.floor(n / 25) + (rand() < (n / 25) % 1 ? 1 : 0); // un destello cada 25 eventos
-          while (k-- > 0) { const r = Math.sqrt(rand()) * 0.4, a = rand() * 6.283; destellos.push({ tipo, x: 0.5 + r * Math.cos(a), y: 0.5 + 0.85 * r * Math.sin(a), v: 0 }); }
+          while (k-- > 0) {
+            if (tipo === 'CC') destellos.push({ tipo, m: Math.min(40, Math.max(8, mTo(t2) * (1 + 0.12 * (rand() - 0.5)))), y: rand(), v: 0, k: 1 });
+            else { const wd = pobl.filter(s => s.m >= 3 && s.m < 8 && s.vida <= t2), s = wd.length ? wd[Math.floor(rand() * wd.length)] : { m: 3 + 5 * rand(), y: rand() }; destellos.push({ tipo, m: s.m, y: s.y, v: 0, k: 0.8 }); }
+          }
         }
         logt = lt2;
         if (logt >= Math.log10(T0 * 1e9) - 0.01) { jugando = false; $('#play', c).textContent = Lg('▶ Otra vez', '▶ Again'); if (!llegoFin) { llegoFin = true; terminar(); } }
@@ -138,7 +197,7 @@
         Cambia β y mira cómo la curva amarilla se carga hacia los retardos cortos (β más negativo) o largos.`, `All the CC go off in the first ~40 Myr: their rate follows the star formation of the moment, r_CC = K_CC ψ.
         The Ia drip out over the whole age of the universe, with f(τ) ∝ τ^β. With β near −1, there are as many Ia between 0.1 and 1 Gyr as between 1 and 10 Gyr.
         Change β and watch the yellow curve shift towards short delay times (more negative β) or long ones.`)}</p>
-        <p class="tenue">${Lg(`Cada destello es 25 explosiones de una generación de 10⁵ M☉ ${marca}.`, `Each flash is 25 explosions from a generation of 10⁵ M☉ ${marca}.`)}</p>
+        <p class="tenue">${Lg(`Cada destello es 25 explosiones de una generación de 10⁵ M☉ ${marca}. Los azules salen en la masa que se apaga en ese momento y los amarillos en las enanas blancas que vienen de 3 a 8 M☉.`, `Each flash is 25 explosions from a generation of 10⁵ M☉ ${marca}. The blue ones appear at the mass that is dying at that moment, the yellow ones on the white dwarfs that come from 3 to 8 M☉.`)}</p>
         <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button></p></div>`;
       u.desbloquear(m.ensena); u.marcar(m.id, true); u.sonar('fanfarria');
       $('#volver', c).onclick = () => fin({ gana: true });
