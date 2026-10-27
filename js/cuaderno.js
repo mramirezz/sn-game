@@ -37,8 +37,8 @@ const Cuaderno = (() => {
         Lg('Con N = 0 la tasa medida es 0, pero la cota superior no: con 1σ es 1.84 supernovas dividido por la exposición.',
           'With N = 0 the measured rate is 0, but the upper limit is not: at 1σ it is 1.84 supernovae divided by the exposure.'),
       ],
-      fuente: Lg('Tesis: cap. 5, sec:methods:rates:ct, el párrafo que sigue a la ecuación de la exposición. Reglas de la tasa de SUDARE, 4.6.',
-        'Thesis: chap. 5, sec:methods:rates:ct, the paragraph that follows the exposure equation. SUDARE rate rules, 4.6.'),
+      fuente: Lg('Tesis: cap. 5, sec:methods:rates:ct, el párrafo que sigue a la ecuación de la exposición.',
+        'Thesis: chap. 5, sec:methods:rates:ct, the paragraph that follows the exposure equation.'),
     },
     {
       id: 'tiempo_control', titulo: Lg('Tiempo de control', 'Control time'), ingles: 'control time',
@@ -112,8 +112,8 @@ const Cuaderno = (() => {
         Lg('Además, toda la exposición se multiplica por 1 − e_SN, donde e_SN es la fracción de supernovas verdaderas que saca la limpieza de AGN (capítulo 4).',
           'In addition, the whole exposure is multiplied by 1 − e_SN, where e_SN is the fraction of true supernovae that the AGN cleaning removes (chapter 4).'),
       ],
-      fuente: Lg('Tesis: cap. 5, sec:methods:rates:ct. Reglas de la tasa de SUDARE, 4.5.',
-        'Thesis: chap. 5, sec:methods:rates:ct. SUDARE rate rules, 4.5.'),
+      fuente: Lg('Tesis: cap. 5, sec:methods:rates:ct.',
+        'Thesis: chap. 5, sec:methods:rates:ct.'),
     },
   ];
 

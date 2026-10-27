@@ -372,7 +372,6 @@
     mostrar();
     function libro() {
       if ($('#volver', c)) return;
-      const md5 = T.generado.textos['reglas_tasa_sudare.md'].slice(0, 8);
       $('#libro', c).innerHTML = `<div class="panel"><h3>${Lg('El libro de las reglas tardías', 'The book of late rules')}</h3>
         <p>${Lg(`Estas reglas se adoptaron con la tasa ya calculada, después de ver un resultado que no calzaba. Cada una tiene su justificación propia,
           pero el orden importa para leer los números: la tesis las declara con su fecha, lo que la motivó y su efecto.`,
@@ -380,7 +379,7 @@
           but the order matters for reading the numbers: the thesis declares them with their date, what motivated them and their effect.`)}</p>
         <table class="tabla libro"><tr>${Object.keys(T.posthoc[0]).map(k => `<th>${posthocEn(k)}</th>`).join('')}</tr>
           ${T.posthoc.map(f => `<tr>${Object.values(f).map(v => `<td>${posthocEn(v)}</td>`).join('')}</tr>`).join('')}</table>
-        <p class="tenue">${Lg(`Leído de docs/reglas_tasa_sudare.md, sección 7 (md5 ${md5}).`, `Read from docs/reglas_tasa_sudare.md, section 7 (md5 ${md5}).`)}</p>
+        <p class="tenue">${Lg('La tesis las discute en sec:disc:limits.', 'The thesis discusses them in sec:disc:limits.')}</p>
         <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button></p></div>`;
       u.desbloquear(m.ensena); u.marcar(m.id, true); u.sonar('fanfarria');
       $('#volver', c).onclick = () => fin({ gana: true });

@@ -4,8 +4,8 @@
   const T = window.TESIS, PL = window.PLANTILLAS, N = T.numeros;
   const f2 = (x, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : '–');
   const fuenteTesis = () => {
-    const l = Object.entries(T.generado.entradas).map(([k, v]) => `${k} (${[v.fecha, v.codigo_git && `commit ${v.codigo_git.slice(0, 7)}`].filter(Boolean).join(', ')})`).join(', ');
-    return Lg(`Números leídos de ${l}.`, `Numbers read from ${l}.`);
+    const fecha = Object.values(T.generado.entradas).map(v => (v.fecha || '').slice(0, 10)).sort().pop(); // la copia de los números de la tesis es de esa fecha
+    return Lg(`Números de la tesis, copia del ${fecha}.`, `Numbers from the thesis, copy of ${fecha}.`);
   };
 
   function tablaLF() {
@@ -27,8 +27,8 @@
     {
       id: 'lf', titulo: Lg('Función de luminosidad', 'Luminosity function'), ingles: 'luminosity function',
       ecuacion: String.raw`P(M_\mathrm{pico}) \;=\; \mathcal{N}\!\left(\bar M_s,\; \sigma_s\right)`,
-      etiqueta: Lg('una gaussiana por subtipo s, en su banda de referencia de reposo (sec:methods:proj:sampling; sin etiqueta propia)',
-        'one Gaussian per subtype s, in its rest-frame reference band (sec:methods:proj:sampling, no label of its own)'),
+      etiqueta: Lg('una gaussiana por subtipo s, en su banda de referencia de reposo (sec:methods:proj:sampling, sin ecuación numerada)',
+        'one Gaussian per subtype s, in its rest-frame reference band (sec:methods:proj:sampling, no numbered equation)'),
       texto: [
         Lg('Las supernovas de una misma clase no tienen todas el mismo brillo: su magnitud absoluta en el pico sigue una distribución, la función de luminosidad.',
           'Supernovae of the same class do not all have the same brightness: their peak absolute magnitude follows a distribution, the luminosity function.'),
@@ -38,8 +38,8 @@
           'For the control time what matters is the true LF, not that of the detected supernovae. The thesis takes it from volume-limited samples in the literature, one per class or subtype, paired with its dust (the approved pairs of the projection), and validates it by comparing what is simulated with what is detected in ZTF.'),
       ],
       extra: tablaLF,
-      fuente: Lg('Tesis: cap. 4, sec:methods:proj:sampling. Reglas de la tasa de SUDARE, 4.5.',
-        'Thesis: chap. 4, sec:methods:proj:sampling. SUDARE rate rules, 4.5.'),
+      fuente: Lg('Tesis: cap. 4, sec:methods:proj:sampling.',
+        'Thesis: chap. 4, sec:methods:proj:sampling.'),
     },
     {
       id: 'subtipos', titulo: Lg('Mezcla de subtipos', 'Subtype mix'), ingles: 'subtype mix',
@@ -56,13 +56,13 @@
             `In the current method (step 4) the mix is that of the thesis simulations, with the II : IIb classes in the ratio ${m}. The SUDARE I mix and the ±50 % variation of the short and long subtypes are source 3 of the systematic error.`);
         },
       ],
-      fuente: Lg('Tesis: cap. 1, sec:intro:rates (ec. de SUDARE I). Reglas de la tasa de SUDARE, 4.5. docs/sistematicos_sudare.md, fuente 3.',
-        'Thesis: chap. 1, sec:intro:rates (SUDARE I equation). SUDARE rate rules, 4.5. docs/sistematicos_sudare.md, source 3.'),
+      fuente: Lg('Tesis: cap. 1, sec:intro:rates (ec. de SUDARE I). Su sistemático: sec:methods:rates:syst, fuente (3).',
+        'Thesis: chap. 1, sec:intro:rates (SUDARE I equation). Its systematic: sec:methods:rates:syst, source (3).'),
     },
     {
       id: 'kcorr', titulo: Lg('K-corrección', 'K-correction'), ingles: 'K-correction',
       ecuacion: String.raw`m_r \;=\; M_r \;+\; \mu(z) \;+\; K_r(z)`,
-      etiqueta: Lg('definición (sin etiqueta propia en la tesis)', 'definition (no label of its own in the thesis)'),
+      etiqueta: Lg('definición (sin ecuación numerada en la tesis)', 'definition (no numbered equation in the thesis)'),
       texto: [
         Lg('El telescopio mide siempre con el mismo filtro, pero la luz de una supernova lejana llega corrida al rojo: el filtro r ve, en reposo, una parte más azul del espectro. La diferencia de magnitud por eso es la K-corrección.',
           'The telescope always measures with the same filter, but the light of a distant supernova arrives redshifted: the r filter sees, in the rest frame, a bluer part of the spectrum. The magnitude difference this causes is the K-correction.'),
@@ -86,8 +86,8 @@
         Lg('En el método vigente las II van sin polvo del host, con su LF observada, y las IIn con la LF impuesta después del polvo. Escalar el polvo por 0.5 y 1.5 es la fuente 4 del sistemático.',
           'In the current method the II have no host dust, with their observed LF, and the IIn have their LF imposed after the dust. Scaling the dust by 0.5 and 1.5 is source 4 of the systematic.'),
       ],
-      fuente: Lg('Tesis: cap. 4, sec:methods:proj:reddening y sec:methods:proj:sampling. docs/sistematicos_sudare.md, fuente 4.',
-        'Thesis: chap. 4, sec:methods:proj:reddening and sec:methods:proj:sampling. docs/sistematicos_sudare.md, source 4.'),
+      fuente: Lg('Tesis: cap. 4, sec:methods:proj:reddening y sec:methods:proj:sampling. Su sistemático: sec:methods:rates:syst, fuente (4).',
+        'Thesis: chap. 4, sec:methods:proj:reddening and sec:methods:proj:sampling. Its systematic: sec:methods:rates:syst, source (4).'),
     },
     {
       id: 'eficiencia', titulo: Lg('Eficiencia de búsqueda', 'Search efficiency'), ingles: 'search efficiency',
@@ -109,14 +109,14 @@
             `With the SUDARE I recipe and the cut, the Ia exposure comes out at ${e} times that of its Table 5, bin by bin. With the literal eq. 1, ${l}.`);
         },
       ],
-      fuente: Lg('Tesis: cap. 5, sec:methods:proj:sudare. Reglas de la tasa de SUDARE, paso 1. ct_ec3/escalera.json.',
-        'Thesis: chap. 5, sec:methods:proj:sudare. SUDARE rate rules, step 1. ct_ec3/escalera.json.'),
+      fuente: Lg('Tesis: cap. 5, sec:methods:proj:sudare.',
+        'Thesis: chap. 5, sec:methods:proj:sudare.'),
     },
     {
       id: 'simetria', titulo: Lg('Selección simétrica', 'Symmetric selection'), ingles: 'symmetric selection',
       ecuacion: Lg(String.raw`r \;=\; \frac{N_S}{A_S}, \qquad S = \text{la misma regla en reales y simuladas}`,
         String.raw`r \;=\; \frac{N_S}{A_S}, \qquad S = \text{the same rule for real and simulated}`),
-      etiqueta: Lg('regla de la tesis (reglas de la tasa, 4.4 y 4.5)', 'thesis rule (rate rules, 4.4 and 4.5)'),
+      etiqueta: Lg('regla de la tesis, sec:methods:rates:count', 'thesis rule, sec:methods:rates:count'),
       texto: [
         Lg('Todo lo que se le hace a una supernova real para contarla (cuántas detecciones pide, qué limpieza la saca) se le hace igual a las simuladas que miden la exposición. Si no, N y A cuentan cosas distintas y la tasa se sesga.',
           'Everything done to a real supernova to count it (how many detections it needs, which cleaning removes it) is done in the same way to the simulated ones that measure the exposure. Otherwise N and A count different things and the rate is biased.'),
@@ -125,7 +125,7 @@
         Lg('La selección de SUDARE I no era simétrica (las reales pedían cinco mediciones, las simuladas una detección): por eso va solo en los pasos 2 y 3.',
           'The SUDARE I selection was not symmetric (the real ones needed five measurements, the simulated ones a single detection): that is why it appears only in steps 2 and 3.'),
       ],
-      fuente: Lg('Reglas de la tasa de SUDARE, 4.3 a 4.5.', 'SUDARE rate rules, 4.3 to 4.5.'),
+      fuente: Lg('Tesis: cap. 5, sec:methods:rates:count.', 'Thesis: chap. 5, sec:methods:rates:count.'),
     },
     {
       id: 'clasificador', titulo: Lg('Clasificador de plantillas', 'Template classifier'), ingles: 'template classifier',
@@ -149,7 +149,7 @@
     {
       id: 'prior', titulo: Lg('Prior de clase P1(z)', 'Class prior P1(z)'), ingles: 'class prior',
       ecuacion: String.raw`P_1:\; \pi_c \,\propto\, \sum_{s \in c} f_s\, g_s(z)\, V_s \qquad P_0:\; \pi_c \,\propto\, f_c\, g_c(z)`,
-      etiqueta: Lg('sec:methods:rates:conv (sin etiqueta propia)', 'sec:methods:rates:conv (no label of its own)'),
+      etiqueta: Lg('sec:methods:rates:conv (sin ecuación numerada)', 'sec:methods:rates:conv (no numbered equation)'),
       texto: [
         Lg('P1 es la fracción de cada tipo entre los candidatos que el survey detecta: la fracción local del subtipo, la evolución de su tasa y su volumen efectivo. P0 es la fracción entre las que explotan a ese z.',
           'P1 is the fraction of each type among the candidates that the survey detects: the local fraction of the subtype, the evolution of its rate and its effective volume. P0 is the fraction among those that explode at that z.'),
@@ -168,8 +168,8 @@
         Lg('P1(z) no se pudo validar en el BTS, cuyo rango de z es angosto. P0(z) y las sensibilidades de P1 escritas en el protocolo van al error sistemático (fuente 2a).',
           'P1(z) could not be validated in the BTS, whose z range is narrow. P0(z) and the P1 sensitivities written in the protocol go into the systematic error (source 2a).'),
       ],
-      fuente: Lg('Tesis: cap. 5, sec:methods:rates:conv y sec:results:bts. prior_fisico_bts.json.',
-        'Thesis: chap. 5, sec:methods:rates:conv and sec:results:bts. prior_fisico_bts.json.'),
+      fuente: Lg('Tesis: cap. 5, sec:methods:rates:conv y sec:results:bts.',
+        'Thesis: chap. 5, sec:methods:rates:conv and sec:results:bts.'),
     },
     {
       id: 'errorz', titulo: Lg('Error del z y migración', 'Redshift error and bin migration'), ingles: 'redshift error and bin migration',
@@ -211,14 +211,14 @@
         () => Lg(`Las PSN pesan ${T.reglas.peso_psn}. En las temporadas posteriores la fracción medida de PSN que son SNe respalda ese peso, y su rango va al sistemático (fuente 1).`,
           `PSN carry a weight of ${T.reglas.peso_psn}. In the later seasons the measured fraction of PSN that are SNe supports that weight, and its range goes into the systematic (source 1).`),
       ],
-      fuente: Lg('Tesis: cap. 5, sec:methods:rates:count y la limpieza de AGN. diag_iin.json.',
-        'Thesis: chap. 5, sec:methods:rates:count and the AGN cleaning. diag_iin.json.'),
+      fuente: Lg('Tesis: cap. 5, sec:methods:rates:count y la limpieza de AGN.',
+        'Thesis: chap. 5, sec:methods:rates:count and the AGN cleaning.'),
     },
     {
       id: 'sistematicos', titulo: Lg('Error sistemático', 'Systematic error'), ingles: 'systematic error budget',
       ecuacion: Lg(String.raw`\sigma_\pm \,=\, \sqrt{\sum_s \left(\Delta r_{s,\pm}\right)^2}, \qquad \Delta r_s = r(\text{supuesto alternativo}) - r`,
         String.raw`\sigma_\pm \,=\, \sqrt{\sum_s \left(\Delta r_{s,\pm}\right)^2}, \qquad \Delta r_s = r(\text{alternative assumption}) - r`),
-      etiqueta: Lg('sec:methods:rates:syst (sin etiqueta propia)', 'sec:methods:rates:syst (no label of its own)'),
+      etiqueta: Lg('sec:methods:rates:syst (sin ecuación numerada)', 'sec:methods:rates:syst (no numbered equation)'),
       texto: [
         Lg('El error estadístico sale de contar pocas supernovas: Gehrels (1986) a 1σ sobre el N total del bin. Con pocas es asimétrico, más largo hacia arriba.',
           'The statistical error comes from counting few supernovae: Gehrels (1986) at 1σ on the total N of the bin. With few of them it is asymmetric, longer upwards.'),
@@ -235,13 +235,13 @@
         Lg('La literatura es una alarma, no una meta (regla 0): si una tasa cae fuera de su rango se busca la causa y se declara, pero no se cambia de variante por eso. Las reglas adoptadas después de ver un resultado se declaran con su fecha y su efecto.',
           'The literature is an alarm, not a target (rule 0): if a rate falls outside its range the cause is sought and declared, but the variant is not changed because of it. Rules adopted after seeing a result are declared with their date and their effect.'),
       ],
-      fuente: Lg('Tesis: cap. 5, sec:methods:rates:syst y el apéndice sec:appendix:sudare:variants. Reglas de la tasa de SUDARE, 0, 4.6 y 7.',
-        'Thesis: chap. 5, sec:methods:rates:syst and the appendix sec:appendix:sudare:variants. SUDARE rate rules, 0, 4.6 and 7.'),
+      fuente: Lg('Tesis: cap. 5, sec:methods:rates:syst y sec:appendix:sudare:variants.',
+        'Thesis: chap. 5, sec:methods:rates:syst and sec:appendix:sudare:variants.'),
     },
     {
       id: 'imf', titulo: Lg('IMF y K_CC', 'IMF and K_CC'), ingles: 'initial mass function',
       ecuacion: String.raw`K_\mathrm{CC} \,=\, \frac{\int_{8}^{40} \phi(m)\,\mathrm{d}m}{\int_{0.1}^{100} m\,\phi(m)\,\mathrm{d}m}`,
-      etiqueta: Lg('sec:results:sfh (sin etiqueta propia)', 'sec:results:sfh (no label of its own)'),
+      etiqueta: Lg('sec:results:sfh (sin ecuación numerada)', 'sec:results:sfh (no numbered equation)'),
       texto: [
         Lg('La IMF φ(m) dice cuántas estrellas nacen de cada masa. K_CC es el número de estrellas de 8 a 40 M☉, las que explotan como CC, por cada M☉ formada.',
           'The IMF φ(m) says how many stars are born with each mass. K_CC is the number of stars from 8 to 40 M☉, the ones that explode as CC, per M☉ formed.'),
@@ -253,7 +253,7 @@
         Lg('La IMF y la SFH van emparejadas: una SFH medida con una IMF se convierte a otra con un factor fijo (Salpeter a Kroupa, × ' + f2(T.sfh.imf.psi_kroupa_sobre_salpeter, 3) + ').',
           'The IMF and the SFH go in pairs: an SFH measured with one IMF is converted to another with a fixed factor (Salpeter to Kroupa, × ' + f2(T.sfh.imf.psi_kroupa_sobre_salpeter, 3) + ').'),
       ],
-      fuente: Lg('Tesis: cap. 5, sec:results:sfh. ajuste.json (imf).', 'Thesis: chap. 5, sec:results:sfh. ajuste.json (imf).'),
+      fuente: Lg('Tesis: cap. 5, sec:results:sfh.', 'Thesis: chap. 5, sec:results:sfh.'),
     },
     {
       id: 'sfh', titulo: Lg('Historia de formación estelar', 'Star-formation history'), ingles: 'cosmic star-formation history',
@@ -289,8 +289,8 @@
         Lg('La SFH elegida mueve N/M★ y casi no mueve β. Entre los modelos de Greggio, los de doble degenerada ancha quedan desfavorecidos.',
           'The chosen SFH moves N/M★ and barely moves β. Among the Greggio models, the wide double-degenerate ones are disfavoured.'),
       ],
-      fuente: Lg('Tesis: cap. 1, sec:intro:rates; cap. 5, sec:results:sfh. ajuste.json y numeros_tasas_final.json.',
-        'Thesis: chap. 1, sec:intro:rates. Chap. 5, sec:results:sfh. ajuste.json and numeros_tasas_final.json.'),
+      fuente: Lg('Tesis: cap. 1, sec:intro:rates; cap. 5, sec:results:sfh.',
+        'Thesis: chap. 1, sec:intro:rates. Chap. 5, sec:results:sfh.'),
     },
   ]);
   window.CuadernoFuenteTesis = fuenteTesis;

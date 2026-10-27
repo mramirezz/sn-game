@@ -790,8 +790,14 @@ const Misiones = (() => {
   const escapar = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const conTipos = s => escapar(s).replace(TIPO, '<span class="tipo">$1</span>');
   function marcarTexto(t) {
+    if (!t.parentElement || t.parentElement.closest('.katex, .tipo')) return;
+    if (ETIQUETA.test(t.nodeValue)) { // las etiquetas de la tesis, con su número; bajo una ecuación, que se sepa que es de la tesis
+      const c = citarTesis(t.nodeValue), sola = t.parentElement.classList.contains('etiqueta') && !t.previousSibling && /^(sec|eq|fig|tab):/.test(t.nodeValue);
+      t.nodeValue = sola ? Lg('Tesis, ', 'Thesis, ') + c : c;
+    }
+    ETIQUETA.lastIndex = 0;
     const s = t.nodeValue;
-    if (!t.parentElement || t.parentElement.closest('.katex, .tipo') || !s.match(TIPO)) return;
+    if (!s.match(TIPO)) return;
     const frag = document.createDocumentFragment();
     let i = 0;
     s.replace(TIPO, (m, g, off) => {

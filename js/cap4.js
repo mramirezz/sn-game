@@ -169,7 +169,7 @@
           `Among the supernovae you find, Ia dominate farther away. They are bright and your survey sees them up to high z. Nearby, CC dominate.
           The thesis prior P1 is exactly that: the fraction of each type among the candidates the survey detects. f is the local fraction of the subtype,
           g the evolution of its rate and V its effective volume in the survey, measured in the simulation. P1(z) computes it in the z bin of the candidate.`)}</p>
-        <div class="ecuacion" id="ecP"></div><p class="etiqueta">sec:methods:rates:conv ${Lg('(sin etiqueta propia)', '(no label of its own)')}</p></div>
+        <div class="ecuacion" id="ecP"></div><p class="etiqueta">sec:methods:rates:conv ${Lg('(sin ecuación numerada)', '(no numbered equation)')}</p></div>
       <p class="fila"><button class="primario" id="calc">${Lg('Calcular el P1(z) de mi survey', 'Compute the P1(z) of my survey')}</button><span class="dato" id="prog"></span></p>
       <canvas class="vista alto" id="cono"></canvas>
       <label class="control" id="ctlZ" hidden><span>${Lg('rebanada en z', 'z slice')}</span><input type="range" id="zr" min="0.06" max="0.8" step="0.01" value="0.1"><output id="ozr"></output></label>

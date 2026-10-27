@@ -46,3 +46,15 @@ for (const b of document.querySelectorAll('[data-idioma]')) {
     location.hash = b.dataset.idioma; location.reload(); // el #, para que valga aunque no haya almacenamiento
   });
 }
+
+// Las etiquetas de la tesis (sec:, eq:, fig:, tab:) se escriben en el código como en LaTeX y se muestran con su número, como un \ref:
+// "eq:methods:rates:ct" -> "ec. 5.2". Los números vienen de data/etiquetas.js (tools/extraer_etiquetas.py, desde la tesis compilada).
+const ETIQUETA = /\b(sec|eq|fig|tab):([A-Za-z0-9_:-]*[A-Za-z0-9_])(:\*)?/g;
+function citarTesis(s) {
+  return s.replace(ETIQUETA, (todo, tipo, resto) => {
+    const n = (window.ETIQUETAS || {})[`${tipo}:${resto}`];
+    if (!n) return todo;
+    if (tipo === 'sec') return /^[A-Z]$/.test(n) ? Lg(`apéndice ${n}`, `Appendix ${n}`) : Lg(`sec. ${n}`, `Sect. ${n}`);
+    return { eq: Lg(`ec. ${n}`, `Eq. ${n}`), fig: Lg(`fig. ${n}`, `Fig. ${n}`), tab: Lg(`tabla ${n}`, `Table ${n}`) }[tipo];
+  });
+}

@@ -23,7 +23,7 @@
           de ellas termina como Ia, goteando durante miles de millones de años.`, `A cloud forms a whole generation of stars at once. The IMF says how many are born at each mass: a huge number of small ones and very few massive ones.
           Stars of 8 to 40 M☉ live briefly and explode as CC. Those of 3 to 8 M☉ end as white dwarfs, and a fraction of a few per cent
           of them end as Ia, dripping out over billions of years.`)}</p>
-        <div class="ecuacion" id="ecK"></div><p class="etiqueta">${Lg('K_CC: sec:results:sfh (sin etiqueta propia)', 'K_CC: sec:results:sfh (no label of its own)')}</p></div>
+        <div class="ecuacion" id="ecK"></div><p class="etiqueta">${Lg('K_CC: tesis, sec:results:sfh (sin ecuación numerada)', 'K_CC: thesis, sec:results:sfh (no numbered equation)')}</p></div>
       <p class="fila"><button id="kroupa" class="primario">${Lg('IMF de Kroupa', 'Kroupa IMF')}</button><button id="salpeter">${Lg('IMF de Salpeter', 'Salpeter IMF')}</button>
         <button class="primario" id="play">${Lg('▶ Que pase el tiempo', '▶ Let time pass')}</button><span class="dato">${Lg('edad de la generación:', 'age of the generation:')} <b id="edad">1 Myr</b></span></p>
       <label class="control"><span>${Lg('β de la DTD', 'DTD β')}</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>

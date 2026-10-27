@@ -208,7 +208,7 @@
           <table class="tabla"><tr>${Lg('<th>parte</th><th>bin</th><th>reales bajo el m50</th><th>sims con corte</th><th>sims sin corte</th><th>p (con corte)</th>',
             '<th>part</th><th>bin</th><th>real below the m50</th><th>sims with cut</th><th>sims without cut</th><th>p (with cut)</th>')}</tr>
           ${filas('sudare_I', 'SUDARE I')}${filas('posterior', Lg('posteriores', 'later seasons'))}</table>
-          <p class="tenue">tasas_final.json, observable_r6. ${Lg('En las posteriores el m50 es un supuesto (maglim − 1.30): ahí aparece la tensión que la tesis declara como alarma y como la fuente 6b del sistemático.',
+          <p class="tenue">${Lg('En las posteriores el m50 es un supuesto (maglim − 1.30): ahí aparece la tensión que la tesis declara como alarma y como la fuente 6b del sistemático.',
             'In the later seasons the m50 is an assumption (maglim − 1.30). That is where the tension appears that the thesis declares as an alarm and as source 6b of the systematics.')}</p></details></div>`;
       const ctx2 = Plot.preparar($('#frac', c)), vals = [frac(real), frac(simC), frac(simS)];
       const T1 = Plot.ejes(ctx2, { x0: -0.6, x1: 2.6, y0: 0, y1: Math.max(0.2, ...vals) * 1.25, xlabel: Lg('reales (juego) · simuladas con corte · simuladas sin corte', 'real (game) · simulated with cut · simulated without cut'), ylabel: Lg('fracción', 'fraction') });
@@ -344,8 +344,8 @@
           'You reproduced the paper with its recipe, and your criterion was set before looking. Only now does it make sense to measure with your physics (step 4 of the thesis).')}</p>
         <h3>${Lg('La tesis, paso 1: la receta de SUDARE I contra su Tabla 5', 'The thesis, step 1: the SUDARE I recipe against their Table 5')}</h3>
         <table class="tabla"><tr><th>${Lg('tipo y bin', 'type and bin')}</th><th>${Lg('A / A de la Tabla 5', 'A / A of Table 5')}</th></tr>${e0.map(b => `<tr><td>${b.tipo} ${b.z1}-${b.z2}</td><td>${f2(b.E0)}</td></tr>`).join('')}</table>
-        <p class="tenue">${Lg(`${T.paso1.pasos.E0}. Ia e Ibc se reproducen sin parámetro libre. Las II y las IIn quedan más lejos y la tesis lo declara (escalera.json).`,
-          `${PASO_E0_EN}. Ia and Ibc are reproduced with no free parameter. The II and IIn end up further off and the thesis declares it (escalera.json).`)}</p>
+        <p class="tenue">${Lg(`${T.paso1.pasos.E0}. Ia e Ibc se reproducen sin parámetro libre. Las II y las IIn quedan más lejos y la tesis lo declara (sec:methods:proj:sudare).`,
+          `${PASO_E0_EN}. Ia and Ibc are reproduced with no free parameter. The II and IIn end up further off and the thesis declares it (sec:methods:proj:sudare).`)}</p>
         <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button> <button id="simetria">${Lg('Experta: la simetría', 'Expert: symmetry')}</button></p></div>`;
       u.desbloquear(m.ensena); u.marcar(m.id, true); u.sonar('fanfarria');
       $('#volver', c).onclick = () => fin({ gana: true });
