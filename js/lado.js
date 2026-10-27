@@ -27,6 +27,13 @@
     m.style.left = `${cam.vertical ? 0 : Math.round((innerWidth - W * cam.k) / 2)}px`; m.style.top = `${cam.vertical ? 0 : Math.round((innerHeight - H * cam.k) / 2)}px`;
   }
   addEventListener('resize', ajustar); ajustar();
+  // Al volver de horizontal a vertical el marco todavía mide lo de horizontal, y el navegador del teléfono se alejaba para que
+  // cupiera (quedaba todo chico y cortado): minimum-scale=1 se lo impide. Después se reajusta hasta que el tamaño se asienta.
+  const vp = document.querySelector('meta[name=viewport]');
+  if (vp && !/minimum-scale/.test(vp.content)) vp.content += ', minimum-scale=1';
+  function reajustar() { for (const ms of [0, 150, 400, 800, 1500]) setTimeout(ajustar, ms); }
+  addEventListener('orientationchange', reajustar);
+  if (window.visualViewport) visualViewport.addEventListener('resize', ajustar);
   // el alto del diálogo, para que el panel del instrumento termine justo encima de él
   if (window.ResizeObserver) new ResizeObserver(() => document.documentElement.style.setProperty('--alto-caja', `${$('#caja').offsetHeight}px`)).observe($('#caja'));
   function moverCamara(dt, x) {
@@ -599,13 +606,14 @@
   // el mismo botón deshace el giro: mientras el juego está girado (pantalla completa) sigue visible y vuelve a vertical
   $('#girar').onclick = async () => {
     Sonido.iniciar();
-    if (document.fullscreenElement) { try { screen.orientation.unlock(); } catch (e) { /* nada */ } return document.exitFullscreen().catch(() => {}); }
+    if (document.fullscreenElement) { try { screen.orientation.unlock(); } catch (e) { /* nada */ } return document.exitFullscreen().catch(() => {}).finally(reajustar); }
     try { await document.documentElement.requestFullscreen(); await screen.orientation.lock('landscape'); }
     catch (e) { decir([['yo', Lg('Para jugar en horizontal, gira el teléfono (con la rotación automática activada). El juego se acomoda solo.', 'To play in landscape, turn the phone (with auto-rotate on). The game adjusts on its own.')]]); }
   };
   document.addEventListener('fullscreenchange', () => {
     const girado = !!document.fullscreenElement;
     document.body.classList.toggle('girado', girado);
+    reajustar();
     $('#girar').title = girado ? Lg('Volver a vertical', 'Back to portrait') : Lg('Jugar en horizontal', 'Play in landscape');
   });
   $('#cerrarCuaderno').onclick = () => M.cerrarCuaderno();
