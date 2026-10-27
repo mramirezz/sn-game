@@ -11,4 +11,4 @@ or a phone, also in landscape. Progress is saved in your browser.
 
 Numbers marked "game universe" come from the game's simulation. The others come from a PhD thesis in progress and may change.
 
-Third-party licences: KaTeX (MIT, vendor/katex/LICENSE), Press Start 2P and Pixelify Sans (SIL Open Font License, vendor/fonts).
+Third-party licences: KaTeX (MIT, vendor/katex/LICENSE), Press Start 2P and Space Mono (SIL Open Font License, vendor/fonts).

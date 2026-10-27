@@ -6,19 +6,20 @@
   <title>SN Rates</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="css/instrumento.css?v=17">
+  <link rel="stylesheet" href="css/instrumento.css?v=18">
   <style>
     @font-face { font-family: Pixel; src: url('vendor/fonts/PressStart2P-Regular.ttf'); }
-    @font-face { font-family: 'Pixelify Sans'; font-weight: 400 700; src: url('vendor/fonts/PixelifySans-latin.woff2') format('woff2'); } /* los diálogos: pixel art y legible, con tildes y ñ */
+    @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('vendor/fonts/SpaceMono-Regular-latin.woff2') format('woff2'); } /* la letra del juego: de máquina y legible (Mauricio, 2026-10-26) */
+    @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('vendor/fonts/SpaceMono-Bold-latin.woff2') format('woff2'); }
     html, body { margin: 0; height: 100%; background: #000; color: #e8ecf8; font-family: system-ui, sans-serif; overflow: hidden;
       touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
     #marco { position: absolute; left: 0; top: 0; } /* lado.js lo centra; sin transform, para que los paneles fijos usen toda la pantalla */
     #vista { position: absolute; left: 0; top: 0; overflow: hidden; }
     #mundo { image-rendering: pixelated; display: block; position: absolute; top: 0; left: 0; }
     .hud { position: absolute; top: 6px; right: 6px; display: flex; gap: 6px; align-items: center; }
-    button.px { font-family: Pixel; font-size: 10px; line-height: 1.4; color: #e8ecf8; background: rgba(8,8,16,.75); border: 2px solid #c9b48a; padding: 6px 8px; }
-    .chip { font-family: Pixel; font-size: 9px; color: #6ee7a0; background: rgba(8,8,16,.7); border: 2px solid #2a5a3a; padding: 5px 6px; }
-    #contador { position: absolute; top: 8px; left: 8px; font-family: Pixel; font-size: 10px; line-height: 1.8; color: #e8d8b0;
+    button.px { font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 13px; line-height: 1.3; color: #e8ecf8; background: rgba(8,8,16,.75); border: 2px solid #c9b48a; padding: 6px 8px; }
+    .chip { font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 12px; color: #6ee7a0; background: rgba(8,8,16,.7); border: 2px solid #2a5a3a; padding: 5px 6px; }
+    #contador { position: absolute; top: 8px; left: 8px; font-family: 'Space Mono', ui-monospace, monospace; font-size: 13px; line-height: 1.45; color: #e8d8b0;
       background: rgba(8,8,16,.7); border: 2px solid #6a5a3a; padding: 4px 8px; max-width: 46%; }
     #contador b { color: #ffb84d; font-weight: 400; }
     #marco.vertical #contador { top: 42px; max-width: calc(100% - 16px); } /* en vertical, debajo de los botones */
@@ -29,9 +30,9 @@
     body.con-panel #caja { position: fixed; bottom: 10px; left: 50%; right: auto; transform: translateX(-50%); width: min(900px, calc(100vw - 20px)); }
     body.con-panel #contador, body.con-panel .hud { display: none; }
     #retrato { width: 56px; height: 56px; flex: none; image-rendering: pixelated; border: 2px solid #6a5a3a; background: #120c0a; }
-    #caja .quien { font-family: Pixel; font-size: 10px; margin-bottom: 6px; color: #ffb84d; }
-    #caja .texto { font-family: 'Pixelify Sans', ui-monospace, monospace; font-size: clamp(18px, 0.45vw + 16px, 22px); line-height: 1.3; letter-spacing: .01em; }
-    #caja .sigue { position: absolute; right: 8px; bottom: 4px; font-family: Pixel; font-size: 9px; animation: parpadeo 1s steps(2) infinite; }
+    #caja .quien { font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #ffb84d; }
+    #caja .texto { font-family: 'Space Mono', ui-monospace, monospace; font-size: clamp(15px, 0.35vw + 13.5px, 18px); line-height: 1.45; }
+    #caja .sigue { position: absolute; right: 8px; bottom: 4px; font-family: 'Space Mono', ui-monospace, monospace; font-size: 12px; animation: parpadeo 1s steps(2) infinite; }
     @keyframes parpadeo { 50% { opacity: 0; } }
     #negro { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .35s; z-index: 10; }
     /* pantalla de inicio: la escena animada en el canvas (vista.js, Titulo) y encima el título y un menú de RPG */
@@ -41,25 +42,25 @@
     #cieloTitulo { position: absolute; inset: 0; width: 100%; height: 100%; }
     #titulo .tit { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 16px; animation: entra 1.4s ease-out both; }
     @keyframes entra { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-    #titulo .pre { margin: 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: clamp(12px, 1.3vw, 15px); letter-spacing: .3em; color: #c9b48a; text-transform: uppercase; text-shadow: 0 2px 0 #000; } /* la pixel del título no tiene Í */
+    #titulo .pre { margin: 0; font-family: 'Space Mono', ui-monospace, monospace; font-size: clamp(11px, 1.1vw, 14px); letter-spacing: .3em; color: #c9b48a; text-transform: uppercase; text-shadow: 0 2px 0 #000; } /* la pixel del título no tiene Í */
     #titulo h1 { margin: 0; font-size: clamp(22px, 5.4vw, 52px); line-height: 1.25; color: #ffb84d; font-weight: 400; letter-spacing: .05em;
       text-shadow: 3px 3px 0 #5a2a00, 6px 6px 0 rgba(0,0,0,.6), 0 0 calc(18px + 40px * var(--flash)) rgba(255,184,77,calc(.4 + .5 * var(--flash))); }
     #titulo h1 span { display: inline-block; }
-    #titulo .sub { margin: 0 0 6px; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: clamp(15px, 1.6vw, 20px); color: #e8d8b0; text-shadow: 0 2px 0 #000; }
+    #titulo .sub { margin: 0 0 6px; font-family: 'Space Mono', ui-monospace, monospace; font-size: clamp(13px, 1.3vw, 17px); color: #e8d8b0; text-shadow: 0 2px 0 #000; }
     #titulo .menu { display: flex; flex-direction: column; gap: 4px; min-width: min(300px, 80vw); padding: 10px; background: rgba(12,9,8,.78);
       border: 2px solid #c9b48a; box-shadow: 0 0 0 2px #000, inset 0 0 0 2px #3a2a1a, 0 10px 30px rgba(0,0,0,.6); }
-    #titulo .boton { position: relative; font-size: clamp(11px, 1.2vw, 14px); padding: 12px 16px 12px 34px; text-align: left; background: transparent; border: 2px solid transparent; color: #e8ecf8; cursor: pointer; }
+    #titulo .boton { position: relative; font-size: clamp(14px, 1.4vw, 17px); padding: 12px 16px 12px 34px; text-align: left; background: transparent; border: 2px solid transparent; color: #e8ecf8; cursor: pointer; }
     #titulo .boton::before { content: '▶'; position: absolute; left: 12px; color: #ffb84d; opacity: 0; }
     #titulo .boton:hover, #titulo .boton:focus-visible, #titulo .boton.activo { color: #ffb84d; background: rgba(255,184,77,.08); border-color: rgba(255,184,77,.35); outline: none; }
     #titulo .boton:hover::before, #titulo .boton:focus-visible::before, #titulo .boton.activo::before { opacity: 1; animation: parpadeo 1s steps(2) infinite; }
-    #titulo .boton.chico { font-size: clamp(10px, 1vw, 12px); }
+    #titulo .boton.chico { font-size: clamp(12px, 1.1vw, 14px); }
     #titulo .menu:hover .boton.activo:not(:hover), #titulo .menu:focus-within .boton.activo:not(:focus-visible):not(:hover) { color: #e8ecf8; background: transparent; border-color: transparent; }
     #titulo .menu:hover .boton.activo:not(:hover)::before, #titulo .menu:focus-within .boton.activo:not(:focus-visible):not(:hover)::before { opacity: 0; }
-    #titulo .estado { margin: 2px 0 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: 15px; color: #c9b48a; min-height: 1em; text-shadow: 0 2px 0 #000; }
-    #titulo .pie-titulo { position: absolute; bottom: 10px; left: 0; right: 0; margin: 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: 13px; color: rgba(232,216,176,.7); text-shadow: 0 2px 0 #000; }
+    #titulo .estado { margin: 2px 0 0; font-family: 'Space Mono', ui-monospace, monospace; font-size: 13px; color: #c9b48a; min-height: 1em; text-shadow: 0 2px 0 #000; }
+    #titulo .pie-titulo { position: absolute; bottom: 10px; left: 0; right: 0; margin: 0; font-family: 'Space Mono', ui-monospace, monospace; font-size: 12px; color: rgba(232,216,176,.7); text-shadow: 0 2px 0 #000; }
     #titulo[hidden] { display: none; }
     #titulo .idioma { display: flex; gap: 8px; margin: 6px 0 0; }
-    #titulo .idioma button { font-size: 9px; padding: 6px 10px; opacity: .6; }
+    #titulo .idioma button { font-size: 12px; padding: 6px 10px; opacity: .6; }
     #titulo .idioma button.activo { opacity: 1; border-color: #ffb84d; color: #ffb84d; }
     #cuaderno { z-index: 9; } /* el cuaderno se puede abrir desde el inicio */
     /* el mando en pantalla: solo con dedo, y solo al caminar (sin diálogo ni instrumento) */
@@ -113,31 +114,31 @@
     </div>
   </div>
   <script src="vendor/katex/katex.min.js"></script>
-  <script src="js/idioma.js?v=17"></script>
-  <script src="js/fisica.js?v=17"></script>
-  <script src="js/universo.js?v=17"></script>
-  <script src="js/plot.js?v=17"></script>
-  <script src="js/vista.js?v=17"></script>
-  <script src="js/cuaderno.js?v=17"></script>
-  <script src="data/plantillas.js?v=17"></script>
-  <script src="data/sudare1.js?v=17"></script>
-  <script src="data/tesis.js?v=17"></script>
-  <script src="data/etiquetas.js?v=17"></script>
-  <script src="data/espectro.js?v=17"></script>
-  <script src="js/cuaderno2.js?v=17"></script>
-  <script src="js/poblacion.js?v=17"></script>
-  <script src="js/cosmos.js?v=17"></script>
-  <script src="js/misiones.js?v=17"></script>
-  <script src="js/vista2.js?v=17"></script>
-  <script src="js/escenas.js?v=17"></script>
-  <script src="js/misiones2.js?v=17"></script>
-  <script src="js/cap3.js?v=17"></script>
-  <script src="js/cap4.js?v=17"></script>
-  <script src="js/cap5.js?v=17"></script>
-  <script src="js/cap6.js?v=17"></script>
-  <script src="js/cap7.js?v=17"></script>
-  <script src="assets/sprites/meta.js?v=17"></script>
-  <script src="assets/sprites/astronomo_anim.js?v=17"></script>
-  <script src="js/lado.js?v=17"></script>
+  <script src="js/idioma.js?v=18"></script>
+  <script src="js/fisica.js?v=18"></script>
+  <script src="js/universo.js?v=18"></script>
+  <script src="js/plot.js?v=18"></script>
+  <script src="js/vista.js?v=18"></script>
+  <script src="js/cuaderno.js?v=18"></script>
+  <script src="data/plantillas.js?v=18"></script>
+  <script src="data/sudare1.js?v=18"></script>
+  <script src="data/tesis.js?v=18"></script>
+  <script src="data/etiquetas.js?v=18"></script>
+  <script src="data/espectro.js?v=18"></script>
+  <script src="js/cuaderno2.js?v=18"></script>
+  <script src="js/poblacion.js?v=18"></script>
+  <script src="js/cosmos.js?v=18"></script>
+  <script src="js/misiones.js?v=18"></script>
+  <script src="js/vista2.js?v=18"></script>
+  <script src="js/escenas.js?v=18"></script>
+  <script src="js/misiones2.js?v=18"></script>
+  <script src="js/cap3.js?v=18"></script>
+  <script src="js/cap4.js?v=18"></script>
+  <script src="js/cap5.js?v=18"></script>
+  <script src="js/cap6.js?v=18"></script>
+  <script src="js/cap7.js?v=18"></script>
+  <script src="assets/sprites/meta.js?v=18"></script>
+  <script src="assets/sprites/astronomo_anim.js?v=18"></script>
+  <script src="js/lado.js?v=18"></script>
 </body>
 </html>

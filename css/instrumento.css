@@ -12,7 +12,7 @@
   --rojo: #ff6b6b;
   --violeta: #b48cff;
   --gris: #7f8bb3;
-  --pixel: 'Pixel', ui-monospace, monospace;
+  --letra: 'Space Mono', ui-monospace, monospace; /* títulos, cuentas y marcadores: la misma letra de máquina de los diálogos */
   --cuerpo: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -24,7 +24,7 @@
   color: var(--texto); font: clamp(15px, 0.35vw + 13.5px, 17px)/1.55 var(--cuerpo); -webkit-user-select: text; user-select: text; }
 .panel-juego[hidden] { display: none; }
 .panel-juego .cabeza { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 2px solid #6a5a3a; background: rgba(20,14,10,.95); }
-.panel-juego .titulo { flex: 1; font-family: var(--pixel); font-size: 11px; color: var(--ambar); line-height: 1.5; }
+.panel-juego .titulo { flex: 1; font-family: var(--letra); font-weight: 700; font-size: 15px; color: var(--ambar); line-height: 1.5; }
 .panel-juego .contenido { flex: 1; overflow-y: auto; padding: 10px max(12px, calc((100% - 1040px) / 2)) 12px; -webkit-overflow-scrolling: touch; } /* en pantallas anchas, el texto no pasa de 1040 px */
 #cuaderno { z-index: 5; }
 /* con un diálogo abierto, el panel se acorta y termina justo encima de la caja: el diálogo nunca tapa lo que explica el instrumento */
@@ -37,7 +37,7 @@ body.con-dialogo .panel-juego { bottom: calc(var(--alto-caja, 110px) + 20px); }
 .panel-juego button.primario { background: var(--ambar); color: #1a1205; border-color: var(--ambar); font-weight: 700; }
 .panel-juego button.grande { padding: .9em 1.2em; touch-action: none; }
 .panel-juego a { color: var(--cian); }
-.panel-juego h1, .panel-juego h2, .panel-juego h3 { font-family: var(--pixel); font-weight: 400; line-height: 1.5; }
+.panel-juego h1, .panel-juego h2, .panel-juego h3 { font-family: var(--letra); font-weight: 700; line-height: 1.5; }
 .panel-juego h1 { font-size: 1.05rem; color: var(--ambar); }
 .panel-juego h2 { font-size: .85rem; color: var(--ambar); margin-top: 1.6rem; }
 .panel-juego h3 { font-size: .7rem; color: var(--cian); }
@@ -60,16 +60,16 @@ body.con-dialogo .panel-juego { bottom: calc(var(--alto-caja, 110px) + 20px); }
 .panel-juego canvas.grafico.tira { height: 150px; cursor: ew-resize; touch-action: none; } /* la línea de tiempo de 6.1 se arrastra */
 .panel-juego canvas.franja { height: 70px; }
 
-.panel-juego .marcador { justify-content: center; font-family: var(--pixel); font-size: 10px; }
-.panel-juego .cuenta { font-family: var(--pixel); font-size: 11px; line-height: 2; text-align: center; }
+.panel-juego .marcador { justify-content: center; font-family: var(--letra); font-size: 13px; }
+.panel-juego .cuenta { font-family: var(--letra); font-size: 14px; line-height: 1.7; text-align: center; }
 .panel-juego .cuenta div { opacity: 0; transition: opacity .4s; }
 .panel-juego .cuenta div.si { opacity: 1; }
 .panel-juego .cuenta b { color: var(--ambar); font-weight: 400; }
-.panel-juego .premio { border-color: var(--verde); color: var(--verde); font-family: var(--pixel); font-size: 10px; line-height: 2; text-align: center; }
+.panel-juego .premio { border-color: var(--verde); color: var(--verde); font-family: var(--letra); font-size: 13px; line-height: 1.7; text-align: center; }
 .panel-juego .premio a { font-family: var(--cuerpo); font-size: 14px; }
 .panel-juego .contrato { border-color: #6a5a3a; }
 .panel-juego .leccion { display: flex; gap: 1rem; align-items: flex-start; border-color: #6a5a3a; }
-.panel-juego .leccion .quien { font-family: var(--pixel); font-size: .6rem; color: var(--ambar); min-width: 8ch; padding-top: .3em; }
+.panel-juego .leccion .quien { font-family: var(--letra); font-weight: 700; font-size: .8rem; color: var(--ambar); min-width: 8ch; padding-top: .3em; }
 .panel-juego .leccion p { margin: .2em 0; }
 
 .panel-juego .ecuacion { background: var(--panel2); border-left: 4px solid var(--ambar); padding: .6rem .8rem; overflow-x: auto; font-size: 1.05rem; }
@@ -82,7 +82,7 @@ body.con-dialogo .panel-juego { bottom: calc(var(--alto-caja, 110px) + 20px); }
 .panel-juego .dato b { color: var(--ambar); font-weight: 600; }
 .panel-juego .aviso { color: var(--rojo); }
 
-.panel-juego .veredicto { font-family: var(--pixel); font-size: .75rem; line-height: 1.7; padding: .8rem 1rem; border: 2px solid; }
+.panel-juego .veredicto { font-family: var(--letra); font-size: .95rem; line-height: 1.6; padding: .8rem 1rem; border: 2px solid; }
 .panel-juego .veredicto.ok { color: var(--verde); border-color: var(--verde); }
 .panel-juego .veredicto.mal { color: var(--rojo); border-color: var(--rojo); }
 .panel-juego .veredicto.medio { color: var(--ambar); border-color: var(--ambar); }

@@ -630,7 +630,7 @@
   // ---------- marcas de lo que se puede tocar ----------
   function marcas(t) {
     const E = ESCENAS[escena];
-    ctx.font = '8px Pixel'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.font = "bold 9px 'Space Mono'"; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     for (const o of visibles(E)) {
       const y = (o.my ?? E.piso - 86) + Math.round(Math.sin(t * 3 + o.x) * 2), x = o.x;
       const meta = esObjetivo(o), p = 0.5 + 0.5 * Math.sin(t * 4 + o.x);
@@ -675,7 +675,7 @@
     const E = ESCENAS[escena], falta = o => o.tipo !== 'salida' && !vistos.has(`${escena}:${o.id}`);
     const izq = visibles(E).filter(o => falta(o) && o.x < cam.x).length, der = visibles(E).filter(o => falta(o) && o.x > cam.x + cam.ancho).length;
     const meta = visibles(E).find(esObjetivo), metaIzq = meta && meta.x < cam.x, metaDer = meta && meta.x > cam.x + cam.ancho;
-    ctx.font = '8px Pixel'; ctx.textBaseline = 'middle';
+    ctx.font = "bold 9px 'Space Mono'"; ctx.textBaseline = 'middle';
     const y = E.piso - 120 + Math.sin(t * 4) * 2;
     if (izq || metaIzq) { ctx.textAlign = 'left'; ctx.fillStyle = metaIzq ? 'rgba(255,184,77,0.85)' : 'rgba(0,0,0,0.6)'; ctx.fillRect(cam.x + 2, y - 9, 34, 18); ctx.fillStyle = metaIzq ? '#1a1205' : '#ffb84d'; ctx.fillText(metaIzq ? '< !' : `< ${izq}`, cam.x + 6, y); }
     if (der || metaDer) { ctx.textAlign = 'right'; ctx.fillStyle = metaDer ? 'rgba(255,184,77,0.85)' : 'rgba(0,0,0,0.6)'; ctx.fillRect(cam.x + cam.ancho - 36, y - 9, 34, 18); ctx.fillStyle = metaDer ? '#1a1205' : '#ffb84d'; ctx.fillText(metaDer ? '! >' : `${der} >`, cam.x + cam.ancho - 6, y); }
@@ -712,6 +712,6 @@
   for (const [k, e] of Object.entries(ESCENAS)) { imagenes[k] = new Image(); imagenes[k].src = e.img; }
   yo.x = 300;
   actualizarContador();
-  document.fonts && document.fonts.load('8px Pixel');
+  document.fonts && document.fonts.load("bold 9px 'Space Mono'");
   requestAnimationFrame(bucle);
 })();
