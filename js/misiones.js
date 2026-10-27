@@ -67,6 +67,8 @@ const Misiones = (() => {
       contrato: [
         ['directora', Lg('Llegaste. Soy Inés, la directora del observatorio.', 'You made it. I am Inés, the director of the observatory.')],
         ['directora', Lg('Aquí medimos cuántas supernovas explotan por año en el universo. Eso se llama una tasa.', 'Here we measure how many supernovae explode per year in the universe. That is called a rate.')],
+        // solo en castellano: el nombre del juego está en inglés
+        ...(IDIOMA === 'es' ? [['directora', 'En inglés se dice rate. Por eso el juego se llama SN Rates: las tasas de supernovas.']] : []),
         ['directora', Lg('Todo lo que se puede tocar tiene una marca. La flecha dorada es lo que toca ahora, lo dorado es importante, lo blanco es opcional y lo que ya viste queda gris.', 'Everything you can touch has a marker. The golden arrow shows what comes next. Gold is important, white is optional, and what you have already seen turns grey.')],
         ['directora', Lg('Partamos por algo chico: una galaxia como la nuestra. Sube a la cúpula y mírala con el telescopio.', "Let's start small: a galaxy like ours. Go up to the dome and look at it through the telescope.")],
         ['directora', Lg('Corre el tiempo, cuenta cuántas explotan y cuántos años miraste.', 'Run the clock, count how many explode and how many years you watched.')],
