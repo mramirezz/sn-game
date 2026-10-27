@@ -14,10 +14,14 @@
     cam.vertical = innerHeight > innerWidth;
     m.classList.toggle('vertical', cam.vertical);
     if (cam.vertical) {
-      cam.k = Math.min((innerHeight - 190) / H, innerWidth / 200);
-      cam.ancho = Math.min(W, innerWidth / cam.k);
-      m.style.width = `${innerWidth}px`; m.style.height = `${innerHeight}px`;
-      vista.style.width = `${innerWidth}px`; vista.style.height = `${H * cam.k}px`;
+      // Volviendo de horizontal, el navegador del teléfono puede quedar alejado con la página más ancha que la pantalla; medir con
+      // ese ancho lo perpetúa (el marco ancho mantiene la página ancha). Se mide con el ancho real de la pantalla y se pide zoom 1.
+      const ancho = Math.min(innerWidth, screen.width || innerWidth), alto = innerHeight * ancho / innerWidth;
+      if (ancho < innerWidth - 2) zoomUno();
+      cam.k = Math.min((alto - 190) / H, ancho / 200);
+      cam.ancho = Math.min(W, ancho / cam.k);
+      m.style.width = `${ancho}px`; m.style.height = `${alto}px`;
+      vista.style.width = `${ancho}px`; vista.style.height = `${H * cam.k}px`;
     } else {
       cam.k = Math.min(innerWidth / W, innerHeight / H); cam.ancho = W;
       m.style.width = `${W * cam.k}px`; m.style.height = `${H * cam.k}px`;
@@ -26,12 +30,20 @@
     cv.style.width = `${W * cam.k}px`; cv.style.height = `${H * cam.k}px`;
     m.style.left = `${cam.vertical ? 0 : Math.round((innerWidth - W * cam.k) / 2)}px`; m.style.top = `${cam.vertical ? 0 : Math.round((innerHeight - H * cam.k) / 2)}px`;
   }
-  addEventListener('resize', ajustar); ajustar();
   // Al volver de horizontal a vertical el marco todavía mide lo de horizontal, y el navegador del teléfono se alejaba para que
   // cupiera (quedaba todo chico y cortado): minimum-scale=1 se lo impide. Después se reajusta hasta que el tamaño se asienta.
   const vp = document.querySelector('meta[name=viewport]');
   if (vp && !/minimum-scale/.test(vp.content)) vp.content += ', minimum-scale=1';
-  function reajustar() { for (const ms of [0, 150, 400, 800, 1500]) setTimeout(ajustar, ms); }
+  function reajustar() { for (const ms of [0, 150, 400, 800, 1500, 2500]) setTimeout(ajustar, ms); }
+  // un cuadro con maximum-scale=1 obliga al navegador a volver al zoom 1; después se le devuelve la libertad de acercar
+  let zoomPedido = 0;
+  function zoomUno() {
+    if (!vp || Date.now() - zoomPedido < 500) return;
+    zoomPedido = Date.now();
+    const c = vp.content; vp.content = `${c}, maximum-scale=1`;
+    setTimeout(() => { vp.content = c; ajustar(); }, 60);
+  }
+  addEventListener('resize', ajustar); ajustar(); // después de vp y zoomUno, que ajustar puede usar
   addEventListener('orientationchange', reajustar);
   if (window.visualViewport) visualViewport.addEventListener('resize', ajustar);
   // el alto del diálogo, para que el panel del instrumento termine justo encima de él
@@ -494,6 +506,8 @@
 
 
   // ---------- pantalla de inicio ----------
+  // la versión que cargó el navegador, chiquita al pie del título: sirve para saber si el teléfono todavía tiene una vieja en caché
+  { const v = (document.querySelector('script[src*="lado.js"]')?.src.match(/v=(\d+)/) || [])[1]; if (v) $('#titulo .pie-titulo').insertAdjacentHTML('beforeend', ` · v${v}`); }
   // Continuar (si hay progreso), comenzar o empezar de nuevo, y el cuaderno. Una partida nueva parte con el
   // astrónomo llegando a pie al cerro; mientras llega no se puede tocar nada.
   let empezado = false, llegando = false;
