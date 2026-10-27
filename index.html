@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Tiempo de control</title>
+  <title>SN Rates</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="css/instrumento.css?v=13">
+  <link rel="stylesheet" href="css/instrumento.css?v=14">
   <style>
     @font-face { font-family: Pixel; src: url('vendor/fonts/PressStart2P-Regular.ttf'); }
     @font-face { font-family: 'Pixelify Sans'; font-weight: 400 700; src: url('vendor/fonts/PixelifySans-latin.woff2') format('woff2'); } /* los diálogos: pixel art y legible, con tildes y ñ */
@@ -58,6 +58,9 @@
     #titulo .estado { margin: 2px 0 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: 15px; color: #c9b48a; min-height: 1em; text-shadow: 0 2px 0 #000; }
     #titulo .pie-titulo { position: absolute; bottom: 10px; left: 0; right: 0; margin: 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: 13px; color: rgba(232,216,176,.7); text-shadow: 0 2px 0 #000; }
     #titulo[hidden] { display: none; }
+    #titulo .idioma { display: flex; gap: 8px; margin: 6px 0 0; }
+    #titulo .idioma button { font-size: 9px; padding: 6px 10px; opacity: .6; }
+    #titulo .idioma button.activo { opacity: 1; border-color: #ffb84d; color: #ffb84d; }
     #cuaderno { z-index: 9; } /* el cuaderno se puede abrir desde el inicio */
     /* el mando en pantalla: solo con dedo, y solo al caminar (sin diálogo ni instrumento) */
     #mando { display: none; position: absolute; left: 10px; right: 10px; bottom: 14px; justify-content: space-between; align-items: center; z-index: 5; pointer-events: none; }
@@ -81,59 +84,61 @@
   <div id="marco">
     <div id="vista"><canvas id="mundo"></canvas></div>
     <div id="contador"></div>
-    <div class="hud"><span class="chip" id="ciencia">0</span><button class="px" id="abrirCuaderno">Cuaderno</button><button class="px" id="musica">♪ sí</button><button class="px girar" id="girar" title="Jugar en horizontal">⟳ <span class="telefono"></span></button></div>
+    <div class="hud"><span class="chip" id="ciencia">0</span><button class="px" id="abrirCuaderno" data-en="Notebook">Cuaderno</button><button class="px" id="musica">♪ sí</button><button class="px girar" id="girar" title="Jugar en horizontal" data-en-title="Play in landscape">⟳ <span class="telefono"></span></button></div>
     <section class="panel-juego" id="instrumento" hidden>
-      <div class="cabeza"><span class="titulo"></span><button class="px" id="salirInstrumento">✕ Salir</button></div>
+      <div class="cabeza"><span class="titulo"></span><button class="px" id="salirInstrumento" data-en="✕ Exit">✕ Salir</button></div>
       <div class="contenido"></div>
     </section>
     <section class="panel-juego" id="cuaderno" hidden>
-      <div class="cabeza"><span class="titulo">Cuaderno</span><button class="px" id="cerrarCuaderno">✕ Cerrar</button></div>
+      <div class="cabeza"><span class="titulo" data-en="Notebook">Cuaderno</span><button class="px" id="cerrarCuaderno" data-en="✕ Close">✕ Cerrar</button></div>
       <div class="contenido"></div>
     </section>
-    <div id="mando"><span class="cruz"><button class="px" id="mIzq" aria-label="Caminar a la izquierda">◀</button><button class="px" id="mDer" aria-label="Caminar a la derecha">▶</button></span><button class="px" id="mAcc" aria-label="Mirar o hablar">●</button></div>
+    <div id="mando"><span class="cruz"><button class="px" id="mIzq" aria-label="Caminar a la izquierda" data-en-aria="Walk left">◀</button><button class="px" id="mDer" aria-label="Caminar a la derecha" data-en-aria="Walk right">▶</button></span><button class="px" id="mAcc" aria-label="Mirar o hablar" data-en-aria="Look or talk">●</button></div>
     <div id="caja"><canvas id="retrato" width="56" height="56"></canvas><div><div class="quien"></div><div class="texto"></div></div><span class="sigue">▼</span></div>
     <div id="negro"></div>
     <div id="titulo">
       <canvas id="cieloTitulo"></canvas><div class="velo"></div>
       <div class="tit">
-        <p class="pre">una aventura de astronomía</p>
-        <h1><span>TIEMPO</span> <span>DE CONTROL</span></h1>
-        <p class="sub">Cuántas supernovas explotan en el universo, y cómo se sabe</p>
-        <nav class="menu" aria-label="Menú">
-          <button class="px boton" id="continuar" hidden>Continuar</button>
-          <button class="px boton" id="nueva">Comenzar</button>
-          <button class="px boton chico" id="tituloCuaderno" hidden>Cuaderno</button>
+        <p class="pre" data-en="an astronomy adventure">una aventura de astronomía</p>
+        <h1><span>SN</span> <span>RATES</span></h1>
+        <p class="sub" data-en="How many supernovae explode in the universe, and how we know">Cuántas supernovas explotan en el universo, y cómo se sabe</p>
+        <nav class="menu" aria-label="Menú" data-en-aria="Menu">
+          <button class="px boton" id="continuar" hidden data-en="Continue">Continuar</button>
+          <button class="px boton" id="nueva" data-en="Start">Comenzar</button>
+          <button class="px boton chico" id="tituloCuaderno" hidden data-en="Notebook">Cuaderno</button>
         </nav>
         <p class="estado" id="tituloEstado"></p>
-        <p class="girar aviso-girar"><span class="telefono gira"></span>También se juega en horizontal: gira el teléfono</p>
+        <p class="girar aviso-girar" data-en="&lt;span class=&quot;telefono gira&quot;&gt;&lt;/span&gt;You can also play in landscape: turn your phone"><span class="telefono gira"></span>También se juega en horizontal: gira el teléfono</p>
+        <p class="idioma"><button class="px" data-idioma="es">Español</button><button class="px" data-idioma="en">English</button></p>
       </div>
-      <p class="pie-titulo">8 capítulos · 24 misiones · de contar supernovas a la tasa de una tesis</p>
+      <p class="pie-titulo" data-en="8 chapters · 24 missions · from counting supernovae to the rate in a thesis">8 capítulos · 24 misiones · de contar supernovas a la tasa de una tesis</p>
     </div>
   </div>
   <script src="vendor/katex/katex.min.js"></script>
-  <script src="js/fisica.js?v=13"></script>
-  <script src="js/universo.js?v=13"></script>
-  <script src="js/plot.js?v=13"></script>
-  <script src="js/vista.js?v=13"></script>
-  <script src="js/cuaderno.js?v=13"></script>
-  <script src="data/plantillas.js?v=13"></script>
-  <script src="data/sudare1.js?v=13"></script>
-  <script src="data/tesis.js?v=13"></script>
-  <script src="data/espectro.js?v=13"></script>
-  <script src="js/cuaderno2.js?v=13"></script>
-  <script src="js/poblacion.js?v=13"></script>
-  <script src="js/cosmos.js?v=13"></script>
-  <script src="js/misiones.js?v=13"></script>
-  <script src="js/vista2.js?v=13"></script>
-  <script src="js/escenas.js?v=13"></script>
-  <script src="js/misiones2.js?v=13"></script>
-  <script src="js/cap3.js?v=13"></script>
-  <script src="js/cap4.js?v=13"></script>
-  <script src="js/cap5.js?v=13"></script>
-  <script src="js/cap6.js?v=13"></script>
-  <script src="js/cap7.js?v=13"></script>
-  <script src="assets/sprites/meta.js?v=13"></script>
-  <script src="assets/sprites/astronomo_anim.js?v=13"></script>
-  <script src="js/lado.js?v=13"></script>
+  <script src="js/idioma.js?v=14"></script>
+  <script src="js/fisica.js?v=14"></script>
+  <script src="js/universo.js?v=14"></script>
+  <script src="js/plot.js?v=14"></script>
+  <script src="js/vista.js?v=14"></script>
+  <script src="js/cuaderno.js?v=14"></script>
+  <script src="data/plantillas.js?v=14"></script>
+  <script src="data/sudare1.js?v=14"></script>
+  <script src="data/tesis.js?v=14"></script>
+  <script src="data/espectro.js?v=14"></script>
+  <script src="js/cuaderno2.js?v=14"></script>
+  <script src="js/poblacion.js?v=14"></script>
+  <script src="js/cosmos.js?v=14"></script>
+  <script src="js/misiones.js?v=14"></script>
+  <script src="js/vista2.js?v=14"></script>
+  <script src="js/escenas.js?v=14"></script>
+  <script src="js/misiones2.js?v=14"></script>
+  <script src="js/cap3.js?v=14"></script>
+  <script src="js/cap4.js?v=14"></script>
+  <script src="js/cap5.js?v=14"></script>
+  <script src="js/cap6.js?v=14"></script>
+  <script src="js/cap7.js?v=14"></script>
+  <script src="assets/sprites/meta.js?v=14"></script>
+  <script src="assets/sprites/astronomo_anim.js?v=14"></script>
+  <script src="js/lado.js?v=14"></script>
 </body>
 </html>

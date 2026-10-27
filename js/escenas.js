@@ -104,10 +104,10 @@ const Escenas = (() => {
       // el observador
       H.luz(g, punta[0], punta[1], 14, '110,231,160', 0.6);
       g.fillStyle = '#e8ecf8'; g.beginPath(); g.arc(punta[0], punta[1], 3, 0, 7); g.fill();
-      g.font = '11px system-ui, sans-serif'; g.textAlign = vertical ? 'left' : 'right'; g.textBaseline = 'middle'; g.fillText('tú (z = 0)', punta[0] + (vertical ? 10 : -8), punta[1]);
+      g.font = '11px system-ui, sans-serif'; g.textAlign = vertical ? 'left' : 'right'; g.textBaseline = 'middle'; g.fillText(Lg('tú (z = 0)', 'you (z = 0)'), punta[0] + (vertical ? 10 : -8), punta[1]);
       g.textAlign = 'left'; g.textBaseline = 'top';
       textos.forEach((tx, i) => { g.fillStyle = tx.color || '#e8ecf8'; V.escribir(g, tx.t, 10, 10 + 16 * i, tx.tam || 12); });
-      if (!est.tocado) { g.fillStyle = 'rgba(200,215,240,0.55)'; g.font = '10px system-ui, sans-serif'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText('arrastra para girar', w - 8, h - 6); }
+      if (!est.tocado) { g.fillStyle = 'rgba(200,215,240,0.55)'; g.font = '10px system-ui, sans-serif'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText(Lg('arrastra para girar', 'drag to rotate'), w - 8, h - 6); }
     }
     // una dirección al azar dentro del campo (u, v en el disco unidad)
     const direccion = rand => { const r = Math.sqrt(rand()) * 0.95, a = rand() * 2 * Math.PI; return { u: r * Math.cos(a), v: r * Math.sin(a) }; };
@@ -153,10 +153,10 @@ const Escenas = (() => {
       g.strokeStyle = '#ffb84d'; g.lineWidth = 2; g.beginPath();
       for (let x = mg.i; x <= w - mg.d; x += 2) { const m = m0 + (m1 - m0) * (x - mg.i) / (w - mg.i - mg.d), y = yT - 10 - (yT * 0.45) * DE(m); x === mg.i ? g.moveTo(x, y) : g.lineTo(x, y); }
       g.stroke();
-      g.fillStyle = '#ffb84d'; g.font = '11px system-ui, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText('DE(m): cuántos agujeros tiene el colador', mg.i, yT - 12 - yT * 0.45);
+      g.fillStyle = '#ffb84d'; g.font = '11px system-ui, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(Lg('DE(m): cuántos agujeros tiene el colador', 'DE(m): how many holes the sieve has'), mg.i, yT - 12 - yT * 0.45);
       g.strokeStyle = '#5ad1ff'; g.setLineDash([5, 4]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(px(m50), 4); g.lineTo(px(m50), yB); g.stroke(); g.setLineDash([]);
       g.fillStyle = '#5ad1ff'; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillText('m50', px(m50), 2);
-      if (corte !== null) { g.fillStyle = 'rgba(255,107,107,0.9)'; g.textAlign = 'left'; g.fillText('corte: pared', px(m50) + 4, yT + 6); }
+      if (corte !== null) { g.fillStyle = 'rgba(255,107,107,0.9)'; g.textAlign = 'left'; g.fillText(Lg('corte: pared', 'cut: wall'), px(m50) + 4, yT + 6); }
       // bolitas
       for (const b of bolas) {
         if (b.estado === 'cae') {
@@ -182,10 +182,10 @@ const Escenas = (() => {
       g.strokeStyle = 'rgba(160,175,210,0.5)'; g.beginPath(); g.moveTo(mg.i, yB); g.lineTo(w - mg.d, yB); g.stroke();
       g.fillStyle = 'rgba(200,215,240,0.85)'; g.font = '10px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top';
       for (let m = 20; m <= 26; m++) g.fillText(m, px(m), yB + 3);
-      g.fillText('magnitud de la supernova esa noche (más débil →)', w / 2, yB + 15);
+      g.fillText(Lg('magnitud de la supernova esa noche (más débil →)', 'supernova magnitude that night (fainter →)'), w / 2, yB + 15);
       g.textAlign = 'left'; g.fillStyle = '#e8ecf8'; g.font = '12px system-ui, sans-serif';
-      g.fillText(`encontradas: ${pasan} de ${total}`, mg.i, yT + 10);
-      g.fillStyle = '#ff9b9b'; g.fillText(`más débiles que el m50: ${debilesPasan}`, mg.i, yT + 26);
+      g.fillText(Lg(`encontradas: ${pasan} de ${total}`, `found: ${pasan} of ${total}`), mg.i, yT + 10);
+      g.fillStyle = '#ff9b9b'; g.fillText(Lg(`más débiles que el m50: ${debilesPasan}`, `fainter than the m50: ${debilesPasan}`), mg.i, yT + 26);
       return { pasan, total, debilesPasan, listo: fuente && total >= fuente.length && bolas.every(b => b.estado === 'fin') };
     }
     return { poner, dibujar };
@@ -223,13 +223,13 @@ const Escenas = (() => {
         const a = -Math.PI / 2 + (giro ? giro.ang : 0);
         g.strokeStyle = '#e8ecf8'; g.lineWidth = 3; g.beginPath(); g.moveTo(rx, cy); g.lineTo(rx + rr * 1.05 * Math.cos(a), cy + rr * 1.05 * Math.sin(a)); g.stroke();
         g.fillStyle = '#e8ecf8'; g.font = '11px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top';
-        g.fillText(`la búsqueda: DE = ${(100 * p).toFixed(0)} %`, rx, cy + rr + 6);
-        if (giro && giro.t > 1.6) { g.font = '13px system-ui, sans-serif'; g.fillStyle = giro.sale ? '#6ee7a0' : '#ff9b9b'; g.fillText(giro.sale ? 'encontrada' : 'se le pasó', rx, cy - rr - 22); }
+        g.fillText(Lg(`la búsqueda: DE = ${(100 * p).toFixed(0)} %`, `the search: DE = ${(100 * p).toFixed(0)} %`), rx, cy + rr + 6);
+        if (giro && giro.t > 1.6) { g.font = '13px system-ui, sans-serif'; g.fillStyle = giro.sale ? '#6ee7a0' : '#ff9b9b'; g.fillText(giro.sale ? Lg('encontrada', 'found') : Lg('se le pasó', 'missed'), rx, cy - rr - 22); }
       }
       g.fillStyle = '#e8ecf8'; g.font = '12px system-ui, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top';
       if (titulo) V.escribir(g, titulo, 8, 6, 12);
       g.font = '11px system-ui, sans-serif'; g.fillStyle = '#5ad1ff';
-      g.fillText(`límite de la noche ${maglim.toFixed(1)} · m50 ${m50.toFixed(1)}`, 8, h - 16);
+      g.fillText(Lg(`límite de la noche ${maglim.toFixed(1)} · m50 ${m50.toFixed(1)}`, `limiting mag that night ${maglim.toFixed(1)} · m50 ${m50.toFixed(1)}`), 8, h - 16);
     }
     return { dibujar, tirar };
   }
@@ -244,7 +244,7 @@ const Escenas = (() => {
       const { g, w, h } = H.lienzo(cv);
       H.pintarFondo(g, w, h, [], ['#060a18', '#02030a']);
       const K = ['Ia', 'II', 'Ibc', 'IIn'], x0 = Math.min(90, w * 0.2), x1 = w - Math.min(90, w * 0.2), alto = (h - 50) / 4, y = i => 34 + (i + 0.5) * alto;
-      g.fillStyle = '#aab3d0'; g.textBaseline = 'alphabetic'; V.escribir(g, 'clase verdadera', x0, 18, 11, 'right'); V.escribir(g, 'clase asignada', x1, 18, 11, 'left');
+      g.fillStyle = '#aab3d0'; g.textBaseline = 'alphabetic'; V.escribir(g, Lg('clase verdadera', 'true class'), 8, 18, 11, 'left'); V.escribir(g, Lg('clase asignada', 'assigned class'), w - 8, 18, 11, 'right'); // pegados a los bordes, para que quepan en el teléfono
       K.forEach((k, i) => { g.fillStyle = CL[k]; V.escribir(g, k, x0 - 12, y(i) + 5, 14, 'right'); V.escribir(g, k, x1 + 12, y(i) + 5, 14, 'left');
         g.fillStyle = `rgba(${RGB(CL[k])},0.25)`; g.fillRect(x0 - 6, y(i) - alto * 0.4, 6, alto * 0.8); g.fillRect(x1, y(i) - alto * 0.4, 6, alto * 0.8); });
       if (!M) return;
@@ -336,7 +336,7 @@ const Escenas = (() => {
             g.fillStyle = a.fueraAlt[k][i] ? '#ff3b3b' : a.color; g.beginPath(); g.arc(cx, y, 5, 0, 7); g.fill(); }));
           if (a.t > 2.2) { ataque = null; a.alTerminar && a.alTerminar(); }
         }
-        if (ataque) { g.fillStyle = '#e8ecf8'; g.font = '12px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top'; V.escribir(g, `ataque ${a.id}: ${a.nombre}`, w / 2, 6, 12, 'center'); }
+        if (ataque) { g.fillStyle = '#e8ecf8'; g.font = '12px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top'; V.escribir(g, `${Lg('ataque', 'attack')} ${a.id}: ${a.nombre}`, w / 2, 6, 12, 'center'); }
       }
       g.restore();
     }
@@ -378,8 +378,8 @@ const Escenas = (() => {
         const sl = suma(p) * esc * Math.min(1, t / (0.3 * p.fuentes.length + 0.3));
         g.fillStyle = 'rgba(255,184,77,0.6)'; g.fillRect(x0, base + 8, Math.min(sl, col - 20), 4);
         g.fillStyle = 'rgba(255,107,107,0.95)'; g.fillRect(x0, base + 14, L, 4);
-        g.font = '10px system-ui, sans-serif'; g.fillStyle = '#ffb84d'; g.fillText(`suma lineal ${suma(p).toFixed(2)}`, x0, base + 30);
-        g.fillStyle = '#ff6b6b'; g.fillText(`cuadratura √(ΣΔ²) ${Math.sqrt(area).toFixed(2)}`, x0 + Math.min(col * 0.45, 130), base + 30);
+        g.font = '10px system-ui, sans-serif'; g.fillStyle = '#ffb84d'; g.fillText(`${Lg('suma lineal', 'linear sum')} ${suma(p).toFixed(2)}`, x0, base + 30);
+        g.fillStyle = '#ff6b6b'; g.fillText(`${Lg('cuadratura', 'quadrature')} √(ΣΔ²) ${Math.sqrt(area).toFixed(2)}`, x0 + Math.min(col * 0.45, 130), base + 30);
       });
     }
     return { poner, dibujar };
@@ -440,7 +440,7 @@ const Escenas = (() => {
     function dibujar(dt) {
       const { g, w, h } = H.lienzo(cv);
       H.pintarFondo(g, w, h, [], ['#070b1a', '#03040b']);
-      if (!filas.length) { g.fillStyle = '#aab3d0'; g.font = '12px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('simula tu modelo para pesarlo contra lo real', w / 2, h / 2); return; }
+      if (!filas.length) { g.fillStyle = '#aab3d0'; g.font = '12px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(Lg('simula tu modelo para pesarlo contra lo real', 'simulate your model to weigh it against the real data'), w / 2, h / 2); return; }
       const n = filas.length, cols = w < 520 ? 2 : 4, filasG = Math.ceil(n / cols), cw = w / cols, ch = h / filasG;
       filas.forEach((f, i) => {
         const cx = (i % cols + 0.5) * cw, cy = (Math.floor(i / cols) + 0.5) * ch + 6, L = Math.min(cw * 0.36, 70);
@@ -460,7 +460,7 @@ const Escenas = (() => {
         g.fillStyle = col; g.font = '14px system-ui, sans-serif'; g.textAlign = 'center'; g.fillText(f.ok ? '✓' : '✗', cx, cy - 10);
       });
       g.font = '10px system-ui, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'bottom';
-      g.fillStyle = '#ffb84d'; g.fillText('■ real', 8, h - 4); g.fillStyle = '#5ad1ff'; g.fillText('■ tu modelo', 56, h - 4);
+      g.fillStyle = '#ffb84d'; g.fillText('■ real', 8, h - 4); g.fillStyle = '#5ad1ff'; g.fillText(Lg('■ tu modelo', '■ your model'), 56, h - 4);
     }
     return { poner, dibujar };
   }
@@ -484,13 +484,13 @@ const Escenas = (() => {
       g.fillStyle = 'rgba(200,215,240,0.85)'; g.font = '10px system-ui, sans-serif';
       g.textAlign = 'right'; g.textBaseline = 'middle'; for (let m = Math.ceil(y0); m <= y1; m++) g.fillText(m, mg.i - 5, py(m));
       g.textAlign = 'center'; g.textBaseline = 'top'; for (let k = 0; k <= 4; k++) { const z = z1 + (z2 - z1) * k / 4; g.fillText(z.toFixed(2), px(z), h - mg.a + 4); }
-      g.fillText('z de la supernova (dentro del bin)', (mg.i + w - mg.d) / 2, h - mg.a + 18);
-      g.save(); g.translate(12, (mg.s + h - mg.a) / 2); g.rotate(-Math.PI / 2); g.fillText('magnitud en el pico (más brillante arriba)', 0, 0); g.restore();
+      g.fillText(Lg('z de la supernova (dentro del bin)', 'supernova z (within the bin)'), (mg.i + w - mg.d) / 2, h - mg.a + 18);
+      g.save(); g.translate(12, (mg.s + h - mg.a) / 2); g.rotate(-Math.PI / 2); g.fillText(Lg('magnitud en el pico (más brillante arriba)', 'peak magnitude (brighter at the top)'), 0, 0); g.restore();
       // la zona de encontradas y el m50
       g.fillStyle = 'rgba(110,231,160,0.06)'; g.fillRect(mg.i, mg.s, w - mg.i - mg.d, py(m50) - mg.s);
       if (cola) { const gr = g.createLinearGradient(0, py(m50), 0, py(m50 + 1)); gr.addColorStop(0, 'rgba(255,184,77,0.18)'); gr.addColorStop(1, 'rgba(255,184,77,0)'); g.fillStyle = gr; g.fillRect(mg.i, py(m50), w - mg.i - mg.d, py(m50 + 1) - py(m50)); }
       g.strokeStyle = '#5ad1ff'; g.setLineDash([6, 4]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(mg.i, py(m50)); g.lineTo(w - mg.d, py(m50)); g.stroke(); g.setLineDash([]);
-      g.fillStyle = '#5ad1ff'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText(cola ? 'm50: con la cola, algunas de abajo también' : 'm50: más débil que esto no se encuentra', w - mg.d, py(m50) - 3);
+      g.fillStyle = '#5ad1ff'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText(cola ? Lg('m50: con la cola, algunas de abajo también', 'm50: with the tail, some below it are found too') : Lg('m50: más débil que esto no se encuentra', 'm50: nothing fainter than this is found'), w - mg.d, py(m50) - 3);
       let enc = 0;
       g.globalCompositeOperation = 'lighter';
       for (const q of pts) {
@@ -501,7 +501,7 @@ const Escenas = (() => {
       }
       g.globalCompositeOperation = 'source-over';
       g.fillStyle = '#e8ecf8'; g.font = '12px system-ui, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top';
-      g.fillText(`encontradas (en promedio): ${enc.toFixed(0)} de ${pts.length}: la exposición A es proporcional a esto`, mg.i + 4, 6);
+      g.fillText(Lg(`encontradas (en promedio): ${enc.toFixed(0)} de ${pts.length}: la exposición A es proporcional a esto`, `found (on average): ${enc.toFixed(0)} of ${pts.length}. The exposure A is proportional to this`), mg.i + 4, 6);
       return enc;
     }
     return { poner, receta, dibujar };

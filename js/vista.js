@@ -35,7 +35,7 @@ const Vista = (() => {
     g.globalCompositeOperation = 'source-over';
   }
   // Escribe en el canvas con los tipos de supernova (Ia, II...) en letra con serifas, como en el resto del juego.
-  const TIPO = /(?<![A-Za-zÀ-ÿ0-9])(II(?:n|b|P|L)?|I(?:a|b\/c|bc|b|c)?)(?![A-Za-zÀ-ÿ0-9])/;
+  const TIPO = /(?<![A-Za-zÀ-ÿ0-9])(II(?:n|b|P|L)?|I(?:a|b\/c|bc|b|c)|(?<=SUDARE\s)I)(?![A-Za-zÀ-ÿ0-9])/; // la I sola solo tras SUDARE: en inglés es el pronombre
   function escribir(g, txt, x, y, tam = 12, alin = 'left') {
     const trozos = txt.split(new RegExp(TIPO.source, 'g')).map((t, i) => ({ t, serif: i % 2 === 1 }));
     const fuente = tr => `${tam}px ${tr.serif ? "'Noto Serif', Georgia, serif" : 'system-ui, sans-serif'}`;
@@ -104,10 +104,10 @@ const Vista = (() => {
       g.strokeStyle = '#8a6a3a'; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, R + 1.5, 0, 7); g.stroke();
       // la regla de los años, con una marca por supernova
       const Tmax = Math.max(300, Math.ceil(T / 100 + 0.4) * 100);
-      regla(g, w * 0.08, w * 0.92, h - 26, { T, Tmax, paso: 100, unidad: ' a', marcas });
+      regla(g, w * 0.08, w * 0.92, h - 26, { T, Tmax, paso: 100, unidad: Lg(' a', ' yr'), marcas });
       g.textAlign = 'left'; g.textBaseline = 'top'; g.font = '12px system-ui, sans-serif';
-      g.fillStyle = C.N; g.fillText(`N = ${marcas.length} supernovas`, 10, 10);
-      g.textAlign = 'right'; g.fillStyle = C.T; g.fillText(`T = ${Math.round(T)} años`, w - 10, 10);
+      g.fillStyle = C.N; g.fillText(`N = ${marcas.length} ${Lg('supernovas', marcas.length === 1 ? 'supernova' : 'supernovae')}`, 10, 10);
+      g.textAlign = 'right'; g.fillStyle = C.T; g.fillText(`T = ${Math.round(T)} ${Lg('años', 'years')}`, w - 10, 10);
     }
     return { dibujar, n: estrellas.length };
   }
@@ -169,7 +169,8 @@ const Vista = (() => {
       ARISTAS.filter(a => !atras(a)).forEach(([i, j]) => { g.beginPath(); g.moveTo(P[i][0], P[i][1]); g.lineTo(P[j][0], P[j][1]); g.stroke(); });
       g.restore();
       for (const e of explosiones) { const s = gal[e.i], p = proy([s.x, s.y, s.z * prof]); supernova(g, p[0], p[1], e.a, 0.6 + 0.6 * p[3] / (f / D)); }
-      if (rotulo) { g.font = '13px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillStyle = 'rgba(3,4,11,0.75)';
+      // el rótulo achica la letra si no cabe a lo ancho (teléfono)
+      if (rotulo) { g.font = '13px system-ui, sans-serif'; const tam = Math.max(9, Math.min(13, Math.floor(13 * (w - 24) / g.measureText(rotulo).width))); g.font = `${tam}px system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillStyle = 'rgba(3,4,11,0.75)';
         const an = g.measureText(rotulo).width + 16; g.fillRect(cx - an / 2, alto - 26, an, 22); g.fillStyle = '#e8ecf8'; g.fillText(rotulo, cx, alto - 9); }
       // las tres medidas del cubo, en las aristas más cercanas que bajan, van a lo ancho y a lo hondo
       const cerca = VERT.map((v, i) => i).sort((a, b) => P[a][2] - P[b][2])[0];
@@ -182,7 +183,7 @@ const Vista = (() => {
       g.fillStyle = C.V; g.fillText('V = (100 Mpc)³ = 10⁶ Mpc³', 10, 10);
       g.fillStyle = C.N; escribir(g, `N = ${marcas.length} Ia`, w - 10, 10, 12, 'right');
       regla(g, w * 0.08, w * 0.92, h - 26, { T, Tmax: 365, paso: 73, unidad: ' d', marcas });
-      g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillStyle = C.T; g.fillText(`T = ${Math.round(T)} días`, w * 0.08, h - 34);
+      g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillStyle = C.T; g.fillText(`T = ${Math.round(T)} ${Lg('días', 'days')}`, w * 0.08, h - 34);
     }
     return { dibujar, n: gal.length };
   }
@@ -216,8 +217,8 @@ const Vista = (() => {
       g.beginPath(); g.moveTo(A.x0, A.y0); g.lineTo(A.x0, A.y1); g.lineTo(A.x1, A.y1); g.stroke();
       g.fillStyle = 'rgba(200,215,240,0.85)'; g.font = '10px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top';
       for (let k = 0; k <= nmax; k += nmax > 16 ? 2 : 1) g.fillText(k, xk(k), A.y1 + 4);
-      g.fillStyle = C.N; escribir(g, 'N: cuántas Ia contaste en un universo', (A.x0 + A.x1) / 2, A.y1 + 17, 11, 'center');
-      g.save(); g.translate(12, (A.y0 + A.y1) / 2); g.rotate(-Math.PI / 2); g.fillStyle = 'rgba(200,215,240,0.85)'; g.textAlign = 'center'; g.fillText('universos', 0, 0); g.restore();
+      g.fillStyle = C.N; escribir(g, Lg('N: cuántas Ia contaste en un universo', 'N: how many Ia you counted in one universe'), (A.x0 + A.x1) / 2, A.y1 + 17, 11, 'center');
+      g.save(); g.translate(12, (A.y0 + A.y1) / 2); g.rotate(-Math.PI / 2); g.fillStyle = 'rgba(200,215,240,0.85)'; g.textAlign = 'center'; g.fillText(Lg('universos', 'universes'), 0, 0); g.restore();
       // barras: una fila de fichas apiladas, para que se vea que cada universo es un bloque
       const fh = (A.y1 - A.y0) / hmax;
       hist.forEach((n, k) => {
@@ -229,13 +230,13 @@ const Vista = (() => {
       if (poisson) { // lo que predice Poisson con la media verdadera
         g.fillStyle = C.T;
         pmf.forEach((v, k) => { g.beginPath(); g.arc(xk(k), yv(v), 3, 0, 7); g.fill(); });
-        g.textAlign = 'right'; g.textBaseline = 'top'; g.font = '10px system-ui, sans-serif'; g.fillText('• lo que predice Poisson', A.x1, A.y0 - 16);
+        g.textAlign = 'right'; g.textBaseline = 'top'; g.font = '10px system-ui, sans-serif'; g.fillText(Lg('• lo que predice Poisson', '• what Poisson predicts'), A.x1, A.y0 - 16);
       }
       if (revelada) {
         const x = A.x0 + (lam + 0.5) * cw;
         g.strokeStyle = '#b48cff'; g.setLineDash([5, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(x, A.y0); g.lineTo(x, A.y1); g.stroke(); g.setLineDash([]);
         g.fillStyle = '#b48cff'; g.textAlign = 'left'; g.textBaseline = 'top'; g.font = '11px system-ui, sans-serif';
-        g.fillText(`media verdadera λ = ${lam.toFixed(2)}`, Math.min(x + 4, A.x1 - 130), A.y0);
+        g.fillText(`${Lg('media verdadera', 'true mean')} λ = ${lam.toFixed(2)}`, Math.min(x + 4, A.x1 - 130), A.y0);
       }
       // fichas cayendo: un cubito con su N
       for (const f of cae.values()) {
@@ -253,8 +254,8 @@ const Vista = (() => {
       g.fillStyle = 'rgba(200,215,240,0.85)'; g.font = '10px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top';
       const pasoX = xmax > 2 ? 0.5 : xmax > 1 ? 0.25 : 0.1;
       for (let v = 0; v <= xmax; v += pasoX) g.fillText(v.toFixed(2), xr(v), B.y1 + 4);
-      g.fillText('tasa de cada universo [10⁻⁴ yr⁻¹ Mpc⁻³]', (B.x0 + B.x1) / 2, B.y1 + 17);
-      g.textBaseline = 'bottom'; g.fillText('la más nueva arriba, con su barra de 1σ', (B.x0 + B.x1) / 2, B.y0 - 4);
+      g.fillText(`${Lg('tasa de cada universo', 'rate of each universe')} [10⁻⁴ yr⁻¹ Mpc⁻³]`, (B.x0 + B.x1) / 2, B.y1 + 17);
+      g.textBaseline = 'bottom'; g.fillText(Lg('la más nueva arriba, con su barra de 1σ', 'newest on top, with its 1σ bar'), (B.x0 + B.x1) / 2, B.y0 - 4);
       let dentro = 0;
       filas.forEach((f, r) => {
         const { lo, hi } = gehrels(f.k), y = B.y0 + (r + 0.5) * fhB, contiene = lam >= lo && lam <= hi;
@@ -271,7 +272,7 @@ const Vista = (() => {
       if (revelada) {
         g.strokeStyle = '#b48cff'; g.setLineDash([5, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(xr(verdad), B.y0); g.lineTo(xr(verdad), B.y1); g.stroke(); g.setLineDash([]);
         g.fillStyle = '#b48cff'; g.font = '11px system-ui, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top';
-        g.fillText('verdadera', Math.min(xr(verdad) + 4, B.x1 - 60), B.y0);
+        g.fillText(Lg('verdadera', 'true'), Math.min(xr(verdad) + 4, B.x1 - 60), B.y0);
       }
       return { dentro, filas: filas.length };
     }

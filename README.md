@@ -1,12 +1,14 @@
-# Tiempo de control
+# SN Rates
 
-Un juego para entender cómo se calcula una tasa de supernovas: contar, el tiempo de control, la población, el survey SUDARE,
-la clasificación, los errores y la historia de formación estelar.
+A game about how a supernova rate is measured: counting, the control time, the population, the SUDARE survey,
+classification, the errors and the star-formation history. In English and Spanish (choose on the title screen).
 
-**Jugar:** abre https://mramirezz.github.io/sn-game/ en el computador o en el celular (también en horizontal).
-El progreso queda guardado en tu navegador.
+Un juego para entender cómo se calcula una tasa de supernovas: contar, el tiempo de control, la población, el survey
+SUDARE, la clasificación, los errores y la historia de formación estelar. En español y en inglés (se elige en el inicio).
 
-Los números marcados como "universo de juego" son de la simulación del juego. Los demás vienen de una tesis doctoral en curso
-y pueden cambiar.
+**Play / Jugar:** https://mramirezz.github.io/sn-game/ (English: https://mramirezz.github.io/sn-game/#en) on a computer
+or a phone, also in landscape. Progress is saved in your browser.
 
-Licencias de terceros: KaTeX (MIT, vendor/katex/LICENSE), Press Start 2P y Pixelify Sans (SIL Open Font License, vendor/fonts).
+Numbers marked "game universe" come from the game's simulation. The others come from a PhD thesis in progress and may change.
+
+Third-party licences: KaTeX (MIT, vendor/katex/LICENSE), Press Start 2P and Pixelify Sans (SIL Open Font License, vendor/fonts).

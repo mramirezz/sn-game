@@ -11,7 +11,7 @@ const Vista2 = (() => {
   };
 
   // ---------- dos tortas: las que explotaron contra las que se encontraron ----------
-  function tortas(cv, { A, B, titulos = ['Explotaron', 'Encontraste'] }) {
+  function tortas(cv, { A, B, titulos = Lg(['Explotaron', 'Encontraste'], ['Exploded', 'You found']) }) {
     const { g, w, h } = lienzo(cv);
     fondo(g, w, h);
     const vertical = w < 480, R = vertical ? Math.min(w * 0.26, h * 0.17) : Math.min(w * 0.15, h * 0.3);
@@ -33,7 +33,7 @@ const Vista2 = (() => {
       }
       g.fillStyle = '#070b1a'; g.beginPath(); g.arc(cx, cy, R * 0.55, 0, 7); g.fill();
       texto(g, `${tot}`, cx, cy - 2, { tam: 18, color: '#e8ecf8', alin: 'center', base: 'middle' });
-      texto(g, 'supernovas', cx, cy + 15, { tam: 10, alin: 'center', base: 'middle' });
+      texto(g, Lg('supernovas', 'supernovae'), cx, cy + 15, { tam: 10, alin: 'center', base: 'middle' });
       texto(g, titulos[k], cx, Math.max(14, cy - R - 42), { tam: 13, color: k ? '#6ee7a0' : '#e8ecf8', alin: 'center', base: 'middle' });
     });
   }
@@ -50,8 +50,8 @@ const Vista2 = (() => {
     g.strokeStyle = 'rgba(160,175,210,0.5)'; g.lineWidth = 1; g.beginPath(); g.moveTo(m.i, m.s); g.lineTo(m.i, h - m.a); g.lineTo(w - m.d, h - m.a); g.stroke();
     for (let z = 0; z <= zmax + 1e-9; z += 0.2) texto(g, z.toFixed(1), px(z), h - m.a + 14, { tam: 10, alin: 'center' });
     for (let M = -21; M <= -13; M += 2) texto(g, `${M}`, m.i - 6, py(M) + 3, { tam: 10, alin: 'right' });
-    texto(g, 'z (distancia)', (m.i + w - m.d) / 2, h - 6, { tam: 11, alin: 'center' });
-    g.save(); g.translate(12, (m.s + h - m.a) / 2); g.rotate(-Math.PI / 2); texto(g, 'M en el pico (más brillante arriba)', 0, 0, { tam: 10, alin: 'center' }); g.restore();
+    texto(g, Lg('z (distancia)', 'z (distance)'), (m.i + w - m.d) / 2, h - 6, { tam: 11, alin: 'center' });
+    g.save(); g.translate(12, (m.s + h - m.a) / 2); g.rotate(-Math.PI / 2); texto(g, Lg('M en el pico (más brillante arriba)', 'M at peak (brighter up)'), 0, 0, { tam: 10, alin: 'center' }); g.restore();
     for (const p of puntos) if (!p.enc) { g.fillStyle = 'rgba(150,160,190,0.35)'; g.fillRect(px(p.z) - 1, py(p.M) - 1, 2, 2); }
     g.globalCompositeOperation = 'lighter';
     for (const p of puntos) if (p.enc) luz(g, px(p.z), py(p.M), 5, hex(CL[p.clase]), 0.9);
@@ -60,8 +60,8 @@ const Vista2 = (() => {
     g.strokeStyle = '#e8ecf8'; g.setLineDash([5, 4]); g.lineWidth = 1.5; g.beginPath();
     for (let z = 0.01; z <= zmax; z += 0.005) { const M = mlim - F.mu(z); if (M < Mlims[0]) break; z === 0.01 ? g.moveTo(px(z), py(Math.min(M, Mlims[1]))) : g.lineTo(px(z), py(Math.min(M, Mlims[1]))); }
     g.stroke(); g.setLineDash([]);
-    texto(g, 'límite: lo más débil que ves a cada z (sin K-corrección)', w - m.d - 4, m.s + 12, { tam: 10, alin: 'right', color: '#e8ecf8' });
-    texto(g, 'zona que no se ve', w - m.d - 4, h - m.a - 8, { tam: 10, alin: 'right', color: '#ff9b9b' });
+    texto(g, Lg('límite: lo más débil que ves a cada z (sin K-corrección)', 'limit: the faintest you see at each z (no K-correction)'), w - m.d - 4, m.s + 12, { tam: 10, alin: 'right', color: '#e8ecf8' });
+    texto(g, Lg('zona que no se ve', 'unseen zone'), w - m.d - 4, h - m.a - 8, { tam: 10, alin: 'right', color: '#ff9b9b' });
   }
   const hex = c => { const n = parseInt(c.slice(1), 16); return `${n >> 16},${(n >> 8) & 255},${n & 255}`; };
 
@@ -80,7 +80,7 @@ const Vista2 = (() => {
     g.fillStyle = 'rgba(90,209,255,0.12)'; g.beginPath(); g.moveTo(px(filtro.onda[0]), py(0));
     filtro.onda.forEach((l, i) => g.lineTo(px(l), py(0.95 * filtro.resp[i] / rmax))); g.lineTo(px(filtro.onda[filtro.onda.length - 1]), py(0)); g.closePath(); g.fill();
     g.strokeStyle = '#5ad1ff'; g.lineWidth = 1.5; g.beginPath(); filtro.onda.forEach((l, i) => i ? g.lineTo(px(l), py(0.95 * filtro.resp[i] / rmax)) : g.moveTo(px(l), py(0.95 * filtro.resp[i] / rmax))); g.stroke();
-    texto(g, 'filtro r', px(6300), py(0.95) - 8, { tam: 11, color: '#5ad1ff', alin: 'center' });
+    texto(g, Lg('filtro r', 'r filter'), px(6300), py(0.95) - 8, { tam: 11, color: '#5ad1ff', alin: 'center' });
     // el espectro corrido al rojo, coloreado por la longitud de onda que llega
     const fmax = Math.max(...flujo);
     for (let i = 1; i < onda.length; i++) {
@@ -94,10 +94,10 @@ const Vista2 = (() => {
     g.strokeStyle = 'rgba(232,236,248,0.6)'; g.setLineDash([4, 4]); g.lineWidth = 1;
     [filtro.onda[0], filtro.onda[filtro.onda.length - 1]].forEach(l => { g.beginPath(); g.moveTo(px(l), m.s); g.lineTo(px(l), py(0)); g.stroke(); });
     g.setLineDash([]);
-    texto(g, `el filtro ve el espectro de reposo entre ${Math.round(a)} y ${Math.round(b)} Å`, w / 2, m.s - 10, { tam: 12, color: '#e8ecf8', alin: 'center' });
+    texto(g, Lg(`el filtro ve el espectro de reposo entre ${Math.round(a)} y ${Math.round(b)} Å`, `the filter sees the rest-frame spectrum between ${Math.round(a)} and ${Math.round(b)} Å`), w / 2, m.s - 10, { tam: 12, color: '#e8ecf8', alin: 'center' });
     g.strokeStyle = 'rgba(160,175,210,0.5)'; g.beginPath(); g.moveTo(m.i, py(0)); g.lineTo(w - m.d, py(0)); g.stroke();
     for (let l = 3000; l <= 10000; l += 1000) texto(g, `${l}`, px(l), py(0) + 14, { tam: 10, alin: 'center' });
-    texto(g, `longitud de onda que llega al telescopio [Å]   ·   z = ${z.toFixed(2)}   ·   fase ${fase >= 0 ? '+' : ''}${fase} d`, w / 2, h - 6, { tam: 11, alin: 'center' });
+    texto(g, Lg(`longitud de onda que llega al telescopio [Å]   ·   z = ${z.toFixed(2)}   ·   fase ${fase >= 0 ? '+' : ''}${fase} d`, `wavelength reaching the telescope [Å]   ·   z = ${z.toFixed(2)}   ·   phase ${fase >= 0 ? '+' : ''}${fase} d`), w / 2, h - 6, { tam: 11, alin: 'center' });
   }
 
   // ---------- una supernova sobre las noches de un campo de SUDARE ----------
@@ -112,8 +112,8 @@ const Vista2 = (() => {
     const px = t => m.i + (w - m.i - m.d) * (t - t0) / (t1 - t0), py = mg => m.s + (h - m.s - m.a) * (mg - y0) / (y1 - y0);
     g.strokeStyle = 'rgba(160,175,210,0.5)'; g.lineWidth = 1; g.beginPath(); g.moveTo(m.i, m.s); g.lineTo(m.i, h - m.a); g.lineTo(w - m.d, h - m.a); g.stroke();
     for (let mg = Math.ceil(y0); mg <= y1; mg += 1) texto(g, `${mg}`, m.i - 6, py(mg) + 3, { tam: 10, alin: 'right' });
-    g.save(); g.translate(12, (m.s + h - m.a) / 2); g.rotate(-Math.PI / 2); texto(g, 'magnitud r (más brillante arriba)', 0, 0, { tam: 10, alin: 'center' }); g.restore();
-    texto(g, 'días (MJD) de la temporada del campo', (m.i + w - m.d) / 2, h - 6, { tam: 11, alin: 'center' });
+    g.save(); g.translate(12, (m.s + h - m.a) / 2); g.rotate(-Math.PI / 2); texto(g, Lg('magnitud r (más brillante arriba)', 'r magnitude (brighter up)'), 0, 0, { tam: 10, alin: 'center' }); g.restore();
+    texto(g, Lg('días (MJD) de la temporada del campo', 'days (MJD) of the field season'), (m.i + w - m.d) / 2, h - 6, { tam: 11, alin: 'center' });
     // cada noche: una franja de su límite y su m50
     for (const e of campo.epocas) {
       const x = px(e.mjd);
@@ -131,9 +131,10 @@ const Vista2 = (() => {
       g.strokeStyle = 'rgba(255,184,77,0.6)'; g.beginPath(); g.moveTo(px(d.t), py(d.m - d.s)); g.lineTo(px(d.t), py(d.m + d.s)); g.stroke();
     }
     if (obs.hallazgo) { const d = obs.hallazgo; g.fillStyle = '#6ee7a0'; estrella(g, px(d.t), py(d.m) - 14, 7); }
-    texto(g, `${sn.clase} a z = ${sn.z.toFixed(2)} · ${obs.det.length} detecciones · ${obs.seleccionada ? 'encontrada y seleccionada' : obs.encontrada ? 'encontrada, pero con menos de 4 detecciones' : 'no encontrada'}`,
+    texto(g, Lg(`${sn.clase} a z = ${sn.z.toFixed(2)} · ${obs.det.length} detecciones · ${obs.seleccionada ? 'encontrada y seleccionada' : obs.encontrada ? 'encontrada, pero con menos de 4 detecciones' : 'no encontrada'}`,
+      `${sn.clase} at z = ${sn.z.toFixed(2)} · ${obs.det.length} detection${obs.det.length === 1 ? '' : 's'} · ${obs.seleccionada ? 'found and selected' : obs.encontrada ? 'found, but with fewer than 4 detections' : 'not found'}`),
       m.i + 6, 14, { tam: 11, color: obs.seleccionada ? '#6ee7a0' : '#ff9b9b' });
-    texto(g, `celeste: el m50 de cada noche${corte === null ? ' (sin corte: la búsqueda sigue más allá)' : ' (corte: más débil que esto no se busca)'}`, w - m.d, 14, { tam: 10, alin: 'right', color: '#5ad1ff' });
+    texto(g, Lg(`celeste: el m50 de cada noche${corte === null ? ' (sin corte: la búsqueda sigue más allá)' : ' (corte: más débil que esto no se busca)'}`, `light blue: the m50 of each night${corte === null ? ' (no cut: the search goes deeper)' : ' (cut: nothing fainter is searched)'}`), w - m.d, 14, { tam: 10, alin: 'right', color: '#5ad1ff' });
   }
   function estrella(g, x, y, r) {
     g.beginPath();
@@ -156,8 +157,8 @@ const Vista2 = (() => {
       g.strokeStyle = 'rgba(160,175,210,0.5)'; g.beginPath(); g.moveTo(px(tPrim + d), h - m.a); g.lineTo(px(tPrim + d), h - m.a + 4); g.stroke();
       texto(g, `${d}`, px(tPrim + d), h - m.a + 14, { tam: 10, alin: 'center' });
     }
-    texto(g, 'días desde la primera detección (del observador)', (m.i + w - m.d) / 2, h - m.a + 30, { tam: 11, alin: 'center' });
-    g.save(); g.translate(11, (m.s + h - m.a) / 2); g.rotate(-Math.PI / 2); texto(g, 'magnitud r', 0, 0, { tam: 11, alin: 'center' }); g.restore();
+    texto(g, Lg('días desde la primera detección (del observador)', 'days since the first detection (observer frame)'), (m.i + w - m.d) / 2, h - m.a + 30, { tam: 11, alin: 'center' });
+    g.save(); g.translate(11, (m.s + h - m.a) / 2); g.rotate(-Math.PI / 2); texto(g, Lg('magnitud r', 'r magnitude'), 0, 0, { tam: 11, alin: 'center' }); g.restore();
     g.save(); g.beginPath(); g.rect(m.i, m.s, w - m.i - m.d, h - m.s - m.a); g.clip();
     for (const mod of modelos) {
       if (!mod) continue;

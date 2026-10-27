@@ -9,7 +9,7 @@
   const T0 = CO.edad(0);
   // vida en la secuencia principal (Gyr), ajuste de libro de texto en log m: aproximación del juego
   const vida = m => { const L = Math.log10(m); return 10 ** (10 - 3.6 * L + 1.0 * L * L) / 1e9; };
-  const SFH = { MF17: { psi: CO.psiMF17, nombre: 'MF17 (Kroupa)' }, MD14: { psi: z => T.sfh.imf.psi_kroupa_sobre_salpeter * CO.psiMD14(z), nombre: 'MD14 llevada a Kroupa' } };
+  const SFH = { MF17: { psi: CO.psiMF17, nombre: 'MF17 (Kroupa)' }, MD14: { psi: z => T.sfh.imf.psi_kroupa_sobre_salpeter * CO.psiMD14(z), nombre: Lg('MD14 llevada a Kroupa', 'MD14 converted to Kroupa') } };
   const zTicks = [0, 0.5, 1, 2, 3, 5];
 
   // ---------- 6.1 el vivero: una generación de estrellas ----------
@@ -17,17 +17,19 @@
     const c = u.cont(), rand = U.rng(Date.now() % 1e9);
     let imfN = 'kroupa', beta = BETA_TESIS, logt = 6, jugando = false, llegoFin = false, cambioImf = false;
     c.innerHTML = `
-      <div class="panel contrato"><h3>El vivero</h3>
-        <p>Una nube forma de golpe una generación de estrellas. La IMF dice cuántas nacen de cada masa: muchísimas chicas y muy pocas masivas.
+      <div class="panel contrato"><h3>${Lg('El vivero', 'The nursery')}</h3>
+        <p>${Lg(`Una nube forma de golpe una generación de estrellas. La IMF dice cuántas nacen de cada masa: muchísimas chicas y muy pocas masivas.
           Las de 8 a 40 M☉ viven poco y explotan como CC. Las de 3 a 8 M☉ terminan como enanas blancas, y una fracción de unos pocos por ciento
-          de ellas termina como Ia, goteando durante miles de millones de años.</p>
-        <div class="ecuacion" id="ecK"></div><p class="etiqueta">K_CC: sec:results:sfh (sin etiqueta propia)</p></div>
-      <p class="fila"><button id="kroupa" class="primario">IMF de Kroupa</button><button id="salpeter">IMF de Salpeter</button>
-        <button class="primario" id="play">▶ Que pase el tiempo</button><span class="dato">edad de la generación: <b id="edad">1 Myr</b></span></p>
-      <label class="control"><span>β de la DTD</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>
+          de ellas termina como Ia, goteando durante miles de millones de años.`, `A cloud forms a whole generation of stars at once. The IMF says how many are born at each mass: a huge number of small ones and very few massive ones.
+          Stars of 8 to 40 M☉ live briefly and explode as CC. Those of 3 to 8 M☉ end as white dwarfs, and a fraction of a few per cent
+          of them end as Ia, dripping out over billions of years.`)}</p>
+        <div class="ecuacion" id="ecK"></div><p class="etiqueta">${Lg('K_CC: sec:results:sfh (sin etiqueta propia)', 'K_CC: sec:results:sfh (no label of its own)')}</p></div>
+      <p class="fila"><button id="kroupa" class="primario">${Lg('IMF de Kroupa', 'Kroupa IMF')}</button><button id="salpeter">${Lg('IMF de Salpeter', 'Salpeter IMF')}</button>
+        <button class="primario" id="play">${Lg('▶ Que pase el tiempo', '▶ Let time pass')}</button><span class="dato">${Lg('edad de la generación:', 'age of the generation:')} <b id="edad">1 Myr</b></span></p>
+      <label class="control"><span>${Lg('β de la DTD', 'DTD β')}</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>
       <canvas class="vista" id="gen"></canvas>
       <canvas class="grafico" id="tl"></canvas>
-      <div class="leyenda"><span><i style="background:#5ad1ff"></i>CC acumuladas</span><span><i style="background:#ffd166"></i>Ia acumuladas</span><span><i style="background:#e8ecf8"></i>enanas blancas</span></div>
+      <div class="leyenda"><span><i style="background:#5ad1ff"></i>${Lg('CC acumuladas', 'cumulative CC')}</span><span><i style="background:#ffd166"></i>${Lg('Ia acumuladas', 'cumulative Ia')}</span><span><i style="background:#e8ecf8"></i>${Lg('enanas blancas', 'white dwarfs')}</span></div>
       <div id="cuentas"></div>
       <div id="fin"></div>`;
     u.tex($('#ecK', c), String.raw`K_\mathrm{CC} \,=\, \frac{\int_{8}^{40} \phi(m)\,\mathrm{d}m}{\int_{0.1}^{100} m\,\phi(m)\,\mathrm{d}m}, \qquad f(\tau) \,\propto\, \tau^{\beta} \;\;(\tau > 40\,\mathrm{Myr})`);
@@ -78,7 +80,7 @@
         g.fillStyle = d.tipo === 'CC' ? `rgba(200,240,255,${a})` : `rgba(255,240,190,${a})`; g.beginPath(); g.arc(d.x * w, d.y * h, 4, 0, 7); g.fill();
       }
       while (destellos.length && destellos[0].v > 0.8) destellos.shift();
-      V2.texto(g, `IMF de ${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} · ${pobl.length} estrellas dibujadas de una generación`, 10, 16, { tam: 12, color: '#e8ecf8' });
+      V2.texto(g, Lg(`IMF de ${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} · ${pobl.length} estrellas dibujadas de una generación`, `${imfN === 'kroupa' ? 'Kroupa' : 'Salpeter'} IMF · ${pobl.length} stars drawn from one generation`), 10, 16, { tam: 12, color: '#e8ecf8' });
       // la línea de tiempo: acumuladas por generación
       const tl = Vista.h.lienzo($('#tl', c)), G = tl.g, W = tl.w, H = tl.h, mg = { i: 44, d: 14, s: 14, a: 30 };
       V2.fondo(G, W, H);
@@ -87,30 +89,34 @@
       for (const [lt, n] of [[6, '1 Myr'], [7, '10 Myr'], [8, '100 Myr'], [9, '1 Gyr'], [10, '10 Gyr']]) V2.texto(G, n, px(lt), H - mg.a + 14, { tam: 10, alin: 'center' });
       V2.texto(G, '100 %', mg.i - 4, py(1) + 4, { tam: 10, alin: 'right' }); V2.texto(G, '0', mg.i - 4, py(0) + 4, { tam: 10, alin: 'right' });
       G.strokeStyle = 'rgba(255,209,102,0.5)'; G.setLineDash([4, 4]); G.beginPath(); G.moveTo(px(7.602), mg.s); G.lineTo(px(7.602), H - mg.a); G.stroke(); G.setLineDash([]);
-      V2.texto(G, '40 Myr: empiezan las Ia', px(7.602) + 4, mg.s + 10, { tam: 10, color: '#ffd166' });
+      V2.texto(G, Lg('40 Myr: empiezan las Ia', '40 Myr: the Ia start'), px(7.602) + 4, mg.s + 10, { tam: 10, color: '#ffd166' });
       for (const [fn, col] of [[fracCC, '#5ad1ff'], [fracIa, '#ffd166']]) {
         G.strokeStyle = col; G.lineWidth = 2.5; G.beginPath();
         for (let lt = 6; lt <= Math.log10(T0 * 1e9); lt += 0.02) { const f = fn(10 ** lt / 1e9); lt === 6 ? G.moveTo(px(lt), py(f)) : G.lineTo(px(lt), py(f)); }
         G.stroke();
       }
       G.strokeStyle = '#e8ecf8'; G.lineWidth = 1.5; G.beginPath(); G.moveTo(px(logt), mg.s); G.lineTo(px(logt), H - mg.a); G.stroke();
-      V2.texto(G, `ya explotó el ${(100 * fracCC(t)).toFixed(0)} % de las CC y el ${(100 * fracIa(t)).toFixed(0)} % de las Ia`, Math.min(px(logt) + 6, W - 230), py(0.55), { tam: 11, color: '#e8ecf8' });
+      // la lectura en el hueco entre la meseta azul y la curva amarilla, en dos líneas cortas para que no tape las curvas
+      const pCC = (100 * fracCC(t)).toFixed(0), pIa = (100 * fracIa(t)).toFixed(0), xl = px(7.75);
+      V2.texto(G, Lg(`CC explotadas: ${pCC} %`, `CC exploded: ${pCC} %`), xl, py(0.84), { tam: 11, color: '#5ad1ff' });
+      V2.texto(G, Lg(`Ia explotadas: ${pIa} %`, `Ia exploded: ${pIa} %`), xl, py(0.74), { tam: 11, color: '#ffd166' });
     }
     function textoCuentas() {
       const k = cuentas();
-      $('#cuentas', c).innerHTML = `<div class="panel"><table class="tabla"><tr><th>por cada 1000 M☉ formadas</th><th>en el juego</th><th>tesis</th></tr>
-        <tr><td>CC (estrellas de 8 a 40 M☉)</td><td>${f2(1e3 * k.kcc, 1)}</td><td>${f2(1e3 * k.tesis.K_CC_8_40, 1)}</td></tr>
-        <tr><td>estrellas de 3 a 8 M☉ (futuras enanas blancas)</td><td>${f2(1e3 * k.n38, 1)}</td><td>${f2(1e3 * k.tesis.N_3_8, 1)}</td></tr>
-        <tr><td>Ia (N/M★ medido, MF17 y Kroupa)</td><td colspan="2">${f2(1e3 * k.nIa, 2)}: el ${f2(100 * k.frac, 1)} % de las de 3 a 8 M☉ termina como Ia</td></tr></table>
-        <p class="tenue">K_CC y las de 3 a 8 M☉ salen de integrar la IMF, igual que en la tesis. N/M★ es el ajuste de la tesis a todas las tasas de Ia
-          (${N['sfh.paso3.todas+nuestras.MF17.n']} medidas de ${N['sfh.paso3.todas+nuestras.MF17.n_obras']} trabajos). Las vidas de las estrellas son una aproximación ${marca}.</p></div>`;
+      $('#cuentas', c).innerHTML = `<div class="panel"><table class="tabla"><tr><th>${Lg('por cada 1000 M☉ formadas', 'per 1000 M☉ formed')}</th><th>${Lg('en el juego', 'in the game')}</th><th>${Lg('tesis', 'thesis')}</th></tr>
+        <tr><td>${Lg('CC (estrellas de 8 a 40 M☉)', 'CC (stars of 8 to 40 M☉)')}</td><td>${f2(1e3 * k.kcc, 1)}</td><td>${f2(1e3 * k.tesis.K_CC_8_40, 1)}</td></tr>
+        <tr><td>${Lg('estrellas de 3 a 8 M☉ (futuras enanas blancas)', 'stars of 3 to 8 M☉ (future white dwarfs)')}</td><td>${f2(1e3 * k.n38, 1)}</td><td>${f2(1e3 * k.tesis.N_3_8, 1)}</td></tr>
+        <tr><td>${Lg('Ia (N/M★ medido, MF17 y Kroupa)', 'Ia (measured N/M★, MF17 and Kroupa)')}</td><td colspan="2">${Lg(`${f2(1e3 * k.nIa, 2)}: el ${f2(100 * k.frac, 1)} % de las de 3 a 8 M☉ termina como Ia`, `${f2(1e3 * k.nIa, 2)}: ${f2(100 * k.frac, 1)} % of the 3 to 8 M☉ stars end as Ia`)}</td></tr></table>
+        <p class="tenue">${Lg(`K_CC y las de 3 a 8 M☉ salen de integrar la IMF, igual que en la tesis. N/M★ es el ajuste de la tesis a todas las tasas de Ia
+          (${N['sfh.paso3.todas+nuestras.MF17.n']} medidas de ${N['sfh.paso3.todas+nuestras.MF17.n_obras']} trabajos). Las vidas de las estrellas son una aproximación ${marca}.`, `K_CC and the 3 to 8 M☉ stars come from integrating the IMF, as in the thesis. N/M★ is the thesis fit to all the Ia rates
+          (${N['sfh.paso3.todas+nuestras.MF17.n']} measurements from ${N['sfh.paso3.todas+nuestras.MF17.n_obras']} works). The stellar lifetimes are an approximation ${marca}.`)}</p></div>`;
     }
     textoCuentas();
     const elegir = n => { imfN = n; cambioImf = true; pobl = estrellas(CO.IMF[n]); $('#kroupa', c).classList.toggle('primario', n === 'kroupa'); $('#salpeter', c).classList.toggle('primario', n === 'salpeter'); textoCuentas(); };
     $('#kroupa', c).onclick = () => elegir('kroupa'); $('#salpeter', c).onclick = () => elegir('salpeter');
     $('#beta', c).oninput = e => { beta = +e.target.value; $('#ob', c).textContent = beta.toFixed(2); };
     $('#ob', c).textContent = beta.toFixed(2);
-    $('#play', c).onclick = () => { if (logt >= Math.log10(T0 * 1e9) - 0.01) logt = 6; jugando = !jugando; $('#play', c).textContent = jugando ? '❚❚ Pausa' : '▶ Que pase el tiempo'; };
+    $('#play', c).onclick = () => { if (logt >= Math.log10(T0 * 1e9) - 0.01) logt = 6; jugando = !jugando; $('#play', c).textContent = jugando ? Lg('❚❚ Pausa', '❚❚ Pause') : Lg('▶ Que pase el tiempo', '▶ Let time pass'); };
     u.animar((dt, ts) => {
       if (jugando) {
         const t1 = 10 ** logt / 1e9, lt2 = Math.min(Math.log10(T0 * 1e9), logt + dt * 0.33), t2 = 10 ** lt2 / 1e9;
@@ -121,21 +127,24 @@
           while (k-- > 0) { const r = Math.sqrt(rand()) * 0.4, a = rand() * 6.283; destellos.push({ tipo, x: 0.5 + r * Math.cos(a), y: 0.5 + 0.85 * r * Math.sin(a), v: 0 }); }
         }
         logt = lt2;
-        if (logt >= Math.log10(T0 * 1e9) - 0.01) { jugando = false; $('#play', c).textContent = '▶ Otra vez'; if (!llegoFin) { llegoFin = true; terminar(); } }
+        if (logt >= Math.log10(T0 * 1e9) - 0.01) { jugando = false; $('#play', c).textContent = Lg('▶ Otra vez', '▶ Again'); if (!llegoFin) { llegoFin = true; terminar(); } }
       }
       dibujar(dt);
       return true;
     });
     function terminar() {
-      $('#fin', c).innerHTML = `<div class="panel"><p>Las CC salen todas en los primeros ~40 Myr: su tasa sigue a la formación estelar del momento, r_CC = K_CC ψ.
+      $('#fin', c).innerHTML = `<div class="panel"><p>${Lg(`Las CC salen todas en los primeros ~40 Myr: su tasa sigue a la formación estelar del momento, r_CC = K_CC ψ.
         Las Ia gotean durante toda la edad del universo, con f(τ) ∝ τ^β. Con β cerca de −1, hay tantas Ia entre 0.1 y 1 Gyr como entre 1 y 10 Gyr.
-        Cambia β y mira cómo la curva amarilla se carga hacia los retardos cortos (β más negativo) o largos.</p>
-        <p class="tenue">Cada destello es 25 explosiones de una generación de 10⁵ M☉ ${marca}.</p>
-        <p><button class="primario" id="volver">Volver al observatorio</button></p></div>`;
+        Cambia β y mira cómo la curva amarilla se carga hacia los retardos cortos (β más negativo) o largos.`, `All the CC go off in the first ~40 Myr: their rate follows the star formation of the moment, r_CC = K_CC ψ.
+        The Ia drip out over the whole age of the universe, with f(τ) ∝ τ^β. With β near −1, there are as many Ia between 0.1 and 1 Gyr as between 1 and 10 Gyr.
+        Change β and watch the yellow curve shift towards short delay times (more negative β) or long ones.`)}</p>
+        <p class="tenue">${Lg(`Cada destello es 25 explosiones de una generación de 10⁵ M☉ ${marca}.`, `Each flash is 25 explosions from a generation of 10⁵ M☉ ${marca}.`)}</p>
+        <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button></p></div>`;
       u.desbloquear(m.ensena); u.marcar(m.id, true); u.sonar('fanfarria');
       $('#volver', c).onclick = () => fin({ gana: true });
-      u.hablar([['directora', cambioImf ? 'Con Salpeter hay menos masivas por masa formada: menos CC por M☉. Por eso la IMF y la SFH van siempre emparejadas.'
-        : 'Prueba también con la IMF de Salpeter: cambia cuántas CC salen por cada M☉ formada.']]);
+      u.hablar([['directora', cambioImf ? Lg('Con Salpeter hay menos masivas por masa formada: menos CC por M☉. Por eso la IMF y la SFH van siempre emparejadas.',
+          'With Salpeter there are fewer massive stars per mass formed: fewer CC per M☉. That is why the IMF and the SFH always go together.')
+        : Lg('Prueba también con la IMF de Salpeter: cambia cuántas CC salen por cada M☉ formada.', 'Try the Salpeter IMF too: it changes how many CC come out per M☉ formed.')]]);
     }
   }
 
@@ -144,20 +153,23 @@
     const c = u.cont();
     let z = 0.25, beta = BETA_TESIS, sfh = 'MF17', vioZ = false, vioB = false;
     c.innerHTML = `
-      <div class="panel contrato"><h3>Muchas generaciones</h3>
-        <p>El universo forma estrellas todo el tiempo, más rápido hace unos 10 mil millones de años (z ≈ 2) que hoy: es la historia de formación estelar ψ.
-          La tasa de Ia que mides a un z es la suma de los goteos de todas las generaciones anteriores: una convolución.</p>
+      <div class="panel contrato"><h3>${Lg('Muchas generaciones', 'Many generations')}</h3>
+        <p>${Lg(`El universo forma estrellas todo el tiempo, más rápido hace unos 10 mil millones de años (z ≈ 2) que hoy: es la historia de formación estelar ψ.
+          La tasa de Ia que mides a un z es la suma de los goteos de todas las generaciones anteriores: una convolución.`, `The universe forms stars all the time, faster about 10 billion years ago (z ≈ 2) than today: this is the star-formation history ψ.
+          The Ia rate you measure at a given z is the sum of the drips from all earlier generations: a convolution.`)}</p>
         <div class="ecuacion" id="ecR"></div><p class="etiqueta">eq:intro:rate_Ia</p></div>
-      <p class="fila"><button id="MF17" class="primario">SFH de Madau y Fragos 2017</button><button id="MD14">SFH de Madau y Dickinson 2014</button></p>
-      <label class="control"><span>z que miras</span><input type="range" id="z" min="0.02" max="1.5" step="0.01" value="${z}"><output id="oz"></output></label>
-      <label class="control"><span>β de la DTD</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>
+      <p class="fila"><button id="MF17" class="primario">${Lg('SFH de Madau y Fragos 2017', 'SFH of Madau and Fragos 2017')}</button><button id="MD14">${Lg('SFH de Madau y Dickinson 2014', 'SFH of Madau and Dickinson 2014')}</button></p>
+      <label class="control"><span>${Lg('z que miras', 'z you look at')}</span><input type="range" id="z" min="0.02" max="1.5" step="0.01" value="${z}"><output id="oz"></output></label>
+      <label class="control"><span>${Lg('β de la DTD', 'DTD β')}</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>
       <canvas class="vista" id="cosmo"></canvas>
-      <p class="tenue pie">Verde: la formación estelar de cada época, generación tras generación. Cada gota amarilla es una Ia: sale de la generación
+      <p class="tenue pie">${Lg(`Verde: la formación estelar de cada época, generación tras generación. Cada gota amarilla es una Ia: sale de la generación
         que la formó y cae en el frasco de "ahora". Salen más gotas de donde el aporte ψ(t′) f(t − t′) es mayor (sombra amarilla), y las brillantes
-        vienen de generaciones de menos de 1.7 Gyr. El nivel del frasco es la tasa de Ia a ese z.</p>
+        vienen de generaciones de menos de 1.7 Gyr. El nivel del frasco es la tasa de Ia a ese z.`, `Green: the star formation of each epoch, generation after generation. Each yellow droplet is an Ia: it leaves the generation
+        that formed it and falls into the "now" jar. More droplets leave where the contribution ψ(t′) f(t − t′) is larger (yellow shading), and the bright ones
+        come from generations younger than 1.7 Gyr. The jar level is the Ia rate at that z.`)}</p>
       <canvas class="grafico" id="edades" style="height:96px"></canvas>
       <canvas class="grafico" id="rz"></canvas>
-      <div class="leyenda"><span><i style="background:#ffd166"></i>Ia: modelo y tasas de la tesis</span><span><i style="background:#f0605d"></i>CC: K_CC ψ y tasas de la tesis</span></div>
+      <div class="leyenda"><span><i style="background:#ffd166"></i>${Lg('Ia: modelo y tasas de la tesis', 'Ia: model and thesis rates')}</span><span><i style="background:#f0605d"></i>${Lg('CC: K_CC ψ y tasas de la tesis', 'CC: K_CC ψ and thesis rates')}</span></div>
       <div id="lectura"></div><div id="fin"></div>`;
     u.tex($('#ecR', c), String.raw`r_\text{Ia}(t) = K_\text{Ia} \int_{\tau_i}^{\min(t,\tau_x)} f_\text{Ia}(\tau)\, \mathrm{SFR}(t-\tau)\, \mathrm{d}\tau, \qquad r_\text{CC} = K_\text{CC}\,\psi`);
     const kcc = T.sfh.imf.Kroupa.K_CC_8_40;
@@ -179,8 +191,8 @@
       g.fillStyle = 'rgba(255,209,102,0.75)'; g.fillRect(xf - fw / 2, yb - fh * nivel, fw, fh * nivel);
       g.strokeStyle = '#e8ecf8'; g.lineWidth = 1.5; g.strokeRect(xf - fw / 2, yb - fh, fw, fh);
       g.strokeStyle = 'rgba(232,236,248,0.6)'; g.lineWidth = 1; g.beginPath(); g.moveTo(xf, mg.s); g.lineTo(xf, yb - fh); g.stroke();
-      V2.texto(g, `z = ${z.toFixed(2)}: ahora`, xf - 6, mg.s + 12, { tam: 11, alin: 'right', color: '#e8ecf8' });
-      V2.texto(g, 'tasa de Ia', xf - fw / 2 - 4, yb - fh - 4, { tam: 10, alin: 'right', color: '#ffd166' });
+      V2.texto(g, Lg(`z = ${z.toFixed(2)}: ahora`, `z = ${z.toFixed(2)}: now`), xf - 6, mg.s + 12, { tam: 11, alin: 'right', color: '#e8ecf8' });
+      V2.texto(g, Lg('tasa de Ia', 'Ia rate'), xf - fw / 2 - 4, yb - fh - 4, { tam: 10, alin: 'right', color: '#ffd166' });
       // gotas nuevas
       acumG += dt * 28 * Math.max(0.15, nivel);
       const tot = cum[cum.length - 1] || 0;
@@ -196,7 +208,7 @@
       for (let k = gotasC.length - 1; k >= 0; k--) if (gotasC[k].u >= 1) gotasC.splice(k, 1);
       g.strokeStyle = 'rgba(160,175,210,0.5)'; g.lineWidth = 1; g.beginPath(); g.moveTo(mg.i, h - mg.a); g.lineTo(w - mg.d, h - mg.a); g.stroke();
       for (let tt = 0; tt <= T0; tt += 2) V2.texto(g, `${tt}`, px(tt), h - mg.a + 14, { tam: 10, alin: 'center' });
-      V2.texto(g, 'edad del universo (Gyr)', (mg.i + w - mg.d) / 2, h - 2, { tam: 11, alin: 'center' });
+      V2.texto(g, Lg('edad del universo (Gyr)', 'age of the universe (Gyr)'), (mg.i + w - mg.d) / 2, h - 2, { tam: 11, alin: 'center' });
       for (const zz of zTicks) V2.texto(g, `z ${zz}`, px(CO.edad(zz)), 14, { tam: 10, alin: 'center', color: '#8a93b8' });
     }
     u.animar(dt => { pintarCosmo(dt); return true; });
@@ -211,15 +223,15 @@
       // de qué edad son las Ia que explotan ahora: una barra apilada por rangos de edad de su generación
       { const cortes = [0.1, 0.5, 1.7, 5, T0], fr = cortes.map(tm => (tm >= t ? 1 : CO.fraccionJoven(z, { psi, beta }, tm)));
         const eb = Vista.h.lienzo($('#edades', c)), G = eb.g, W = eb.w, H = eb.h; V2.fondo(G, W, H);
-        const nombres = ['< 0.1 Gyr', '0.1 a 0.5', '0.5 a 1.7', '1.7 a 5', '> 5 Gyr'], alfa = [1, 0.8, 0.6, 0.4, 0.25];
-        V2.texto(G, `las Ia que explotan a z = ${z.toFixed(2)}, según la edad de su generación`, 8, 14, { tam: 11, color: '#e8ecf8' });
+        const nombres = Lg(['< 0.1 Gyr', '0.1 a 0.5', '0.5 a 1.7', '1.7 a 5', '> 5 Gyr'], ['< 0.1 Gyr', '0.1 to 0.5', '0.5 to 1.7', '1.7 to 5', '> 5 Gyr']), alfa = [1, 0.8, 0.6, 0.4, 0.25];
+        V2.texto(G, Lg(`las Ia que explotan a z = ${z.toFixed(2)}, según la edad de su generación`, `Ia exploding at z = ${z.toFixed(2)}, by the age of their generation`), 8, 14, { tam: 11, color: '#e8ecf8' });
         let x = 8; const ancho = W - 16;
         fr.forEach((f, i) => { const d = f - (i ? fr[i - 1] : 0), wd = ancho * d; if (wd <= 0) return;
           G.fillStyle = `rgba(255,209,102,${alfa[i]})`; G.fillRect(x, 24, wd - 1, 30);
           if (wd > 50) { V2.texto(G, `${(100 * d).toFixed(0)} %`, x + wd / 2, 44, { tam: 12, alin: 'center', color: '#03040b' }); V2.texto(G, nombres[i], x + wd / 2, 70, { tam: 10, alin: 'center' }); }
           x += wd; }); }
       // r(z) con las tasas de la tesis
-      const ctx = Plot.preparar($('#rz', c)), TT = Plot.ejes(ctx, { x0: 0, x1: 1.5, y0: 0, y1: 2.6, xlabel: 'z', ylabel: 'tasa (10⁻⁴ yr⁻¹ Mpc⁻³)' });
+      const ctx = Plot.preparar($('#rz', c)), TT = Plot.ejes(ctx, { x0: 0, x1: 1.5, y0: 0, y1: 2.6, xlabel: 'z', ylabel: Lg('tasa (10⁻⁴ yr⁻¹ Mpc⁻³)', 'rate (10⁻⁴ yr⁻¹ Mpc⁻³)') });
       const zs = Array.from({ length: 60 }, (_, i) => 0.01 + 1.49 * i / 59);
       Plot.linea(ctx, TT, zs, zs.map(zz => 1e4 * CO.tasaIa(zz, { psi, beta, K: NM_TESIS, n: 160 })), CL.Ia, 2.5);
       Plot.linea(ctx, TT, zs, zs.map(zz => 1e4 * kcc * psi(zz)), CL.II, 2.5);
@@ -229,10 +241,12 @@
       }
       Plot.vline(ctx, TT, z, 'rgba(232,236,248,0.6)');
       const fj = CO.fraccionJoven(z, { psi, beta }, 1.7);
-      $('#lectura', c).innerHTML = `<div class="panel"><p>A z = ${z.toFixed(2)}, el ${(100 * fj).toFixed(0)} % de las Ia viene de generaciones de menos de 1.7 Gyr.
-        Las CC, en cambio, son de la generación de ahora: su curva es ψ escalada por K_CC = ${f2(1e2 * kcc, 2)} × 10⁻² por M☉ (Kroupa).</p>
-        <p class="tenue">La curva de Ia usa el N/M★ de la tesis (${f2(1e3 * NM_TESIS, 2)} × 10⁻³ M☉⁻¹, ajuste a todas las tasas con MF17). Los puntos son las tasas de SUDARE de la tesis,
-          con su barra estadística.</p></div>`;
+      $('#lectura', c).innerHTML = `<div class="panel"><p>${Lg(`A z = ${z.toFixed(2)}, el ${(100 * fj).toFixed(0)} % de las Ia viene de generaciones de menos de 1.7 Gyr.
+        Las CC, en cambio, son de la generación de ahora: su curva es ψ escalada por K_CC = ${f2(1e2 * kcc, 2)} × 10⁻² por M☉ (Kroupa).`, `At z = ${z.toFixed(2)}, ${(100 * fj).toFixed(0)} % of the Ia come from generations younger than 1.7 Gyr.
+        The CC, instead, belong to the current generation: their curve is ψ scaled by K_CC = ${f2(1e2 * kcc, 2)} × 10⁻² per M☉ (Kroupa).`)}</p>
+        <p class="tenue">${Lg(`La curva de Ia usa el N/M★ de la tesis (${f2(1e3 * NM_TESIS, 2)} × 10⁻³ M☉⁻¹, ajuste a todas las tasas con MF17). Los puntos son las tasas de SUDARE de la tesis,
+          con su barra estadística.`, `The Ia curve uses the thesis N/M★ (${f2(1e3 * NM_TESIS, 2)} × 10⁻³ M☉⁻¹, fit to all the rates with MF17). The points are the thesis SUDARE rates,
+          with their statistical error bars.`)}</p></div>`;
       if (vioZ && vioB && !$('#volver', c)) terminar();
     }
     const elegir = n => { sfh = n; $('#MF17', c).classList.toggle('primario', n === 'MF17'); $('#MD14', c).classList.toggle('primario', n === 'MD14'); dibujar(); };
@@ -241,11 +255,12 @@
     $('#beta', c).oninput = e => { beta = +e.target.value; $('#ob', c).textContent = beta.toFixed(2); vioB = true; dibujar(); };
     $('#oz', c).textContent = z.toFixed(2); $('#ob', c).textContent = beta.toFixed(2);
     dibujar();
-    u.hablar([['directora', 'Lleva el z hasta más allá de 1 y mueve β: mira de qué generaciones vienen las Ia en cada caso.']]);
+    u.hablar([['directora', Lg('Lleva el z hasta más allá de 1 y mueve β: mira de qué generaciones vienen las Ia en cada caso.', 'Take z beyond 1 and move β: see which generations the Ia come from in each case.')]]);
     function terminar() {
-      $('#fin', c).innerHTML = `<div class="panel"><p>Con β más negativo las Ia vienen de generaciones más jóvenes y su tasa sigue más de cerca a ψ.
-        Con β más plano, el goteo de las viejas pesa más y la tasa sube más lento con z. Eso es lo que miden las tasas a distintos z.</p>
-        <p><button class="primario" id="volver">Volver al observatorio</button></p></div>`;
+      $('#fin', c).innerHTML = `<div class="panel"><p>${Lg(`Con β más negativo las Ia vienen de generaciones más jóvenes y su tasa sigue más de cerca a ψ.
+        Con β más plano, el goteo de las viejas pesa más y la tasa sube más lento con z. Eso es lo que miden las tasas a distintos z.`, `With a more negative β the Ia come from younger generations and their rate follows ψ more closely.
+        With a flatter β, the drip from the old generations weighs more and the rate rises more slowly with z. That is what rates at different z measure.`)}</p>
+        <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button></p></div>`;
       u.desbloquear(m.ensena); u.marcar(m.id, true); u.sonar('fanfarria');
       $('#volver', c).onclick = () => fin({ gana: true });
     }
@@ -282,19 +297,22 @@
     const c = u.cont(), { lit, nuestras } = datosIa();
     let beta = -0.5, sfh = 'MF17', conLit = false, perfiles = {}, tocados = new Set();
     c.innerHTML = `
-      <div class="panel contrato"><h3>Los controles de la fábrica</h3>
-        <p>Mueve β y elige la SFH. Para cada elección, K sale analítico, K̂ = Σ r m / σ² / Σ m² / σ², y el χ² dice qué tan bien pasa el modelo por las tasas medidas.
-          Primero solo con las cuatro tasas de Ia de SUDARE. Después con toda la literatura.</p></div>
-      <p class="fila"><button id="MF17" class="primario">MF17</button><button id="MD14">MD14 (a Kroupa)</button>
-        <button id="soloS" class="primario">Solo SUDARE</button><button id="conL">SUDARE y literatura</button></p>
-      <label class="control"><span>β de la DTD</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>
+      <div class="panel contrato"><h3>${Lg('Los controles de la fábrica', 'The factory controls')}</h3>
+        <p>${Lg(`Mueve β y elige la SFH. Para cada elección, K sale analítico, K̂ = Σ r m / σ² / Σ m² / σ², y el χ² dice qué tan bien pasa el modelo por las tasas medidas.
+          Primero solo con las cuatro tasas de Ia de SUDARE. Después con toda la literatura.`, `Move β and choose the SFH. For each choice, K comes out analytically, K̂ = Σ r m / σ² / Σ m² / σ², and the χ² says how well the model passes through the measured rates.
+          First with only the four SUDARE Ia rates. Then with all the literature.`)}</p></div>
+      <p class="fila"><button id="MF17" class="primario">MF17</button><button id="MD14">${Lg('MD14 (a Kroupa)', 'MD14 (to Kroupa)')}</button>
+        <button id="soloS" class="primario">${Lg('Solo SUDARE', 'SUDARE only')}</button><button id="conL">${Lg('SUDARE y literatura', 'SUDARE and literature')}</button></p>
+      <label class="control"><span>${Lg('β de la DTD', 'DTD β')}</span><input type="range" id="beta" min="-2" max="-0.3" step="0.01" value="${beta}"><output id="ob"></output></label>
       <div class="fila"><span class="dato">K̂ = <b id="k"></b> × 10⁻³ M☉⁻¹</span><span class="dato">χ² = <b id="chi"></b></span><span class="dato" id="nd"></span></div>
       <canvas class="vista" id="fit"></canvas>
       <canvas class="grafico" id="perfil"></canvas>
-      <p class="tenue pie">Cada medida está unida al modelo por un resorte: verde si está a menos de 1σ, ámbar entre 1 y 2σ, rojo más allá.
-        El χ² es la suma de lo que se estira cada resorte, medido en su error, al cuadrado. Mueve β y mira cuándo quedan más sueltos.</p>
-      <p class="tenue pie">Abajo: Δχ² contra β. Línea continua, el juego con estos mismos datos. Punteada, la tesis. El punto es tu β.
-        Donde la curva sube 1 sobre su mínimo queda el intervalo de 1σ.</p>
+      <p class="tenue pie">${Lg(`Cada medida está unida al modelo por un resorte: verde si está a menos de 1σ, ámbar entre 1 y 2σ, rojo más allá.
+        El χ² es la suma de lo que se estira cada resorte, medido en su error, al cuadrado. Mueve β y mira cuándo quedan más sueltos.`, `Each measurement is tied to the model by a spring: green if it is within 1σ, amber between 1 and 2σ, red beyond.
+        The χ² is the sum of how far each spring stretches, measured in its error, squared. Move β and see when they hang looser.`)}</p>
+      <p class="tenue pie">${Lg(`Abajo: Δχ² contra β. Línea continua, el juego con estos mismos datos. Punteada, la tesis. El punto es tu β.
+        Donde la curva sube 1 sobre su mínimo queda el intervalo de 1σ.`, `Below: Δχ² against β. Solid line, the game with these same data. Dashed, the thesis. The dot is your β.
+        Where the curve rises 1 above its minimum lies the 1σ interval.`)}</p>
       <div id="lectura"></div><div id="cc"></div><div id="fin"></div>`;
     const datos = () => (conLit ? [...lit, ...nuestras] : nuestras);
     // r en 10⁻⁴ yr⁻¹ Mpc⁻³ = 1e4 × K × conv; con el modelo escalado así, K̂ es directamente K en M☉⁻¹
@@ -308,9 +326,9 @@
     }
     function dibujar() {
       const d = datos(), r = ajustar(d, conv(beta, sfh));
-      $('#k', c).textContent = f2(1e3 * r.K, 2); $('#chi', c).textContent = `${f2(r.chi2, 1)} con ${d.length - 2} grados de libertad`;
-      $('#nd', c).textContent = `${d.length} tasas`;
-      const ctx = Plot.preparar($('#fit', c)), x1 = conLit ? 2.0 : 0.85, TT = Plot.ejes(ctx, { x0: 0, x1, y0: 0, y1: conLit ? 2.2 : 1.3, xlabel: 'z', ylabel: 'tasa de Ia (10⁻⁴ yr⁻¹ Mpc⁻³)' });
+      $('#k', c).textContent = f2(1e3 * r.K, 2); $('#chi', c).textContent = Lg(`${f2(r.chi2, 1)} con ${d.length - 2} grados de libertad`, `${f2(r.chi2, 1)} with ${d.length - 2} degrees of freedom`);
+      $('#nd', c).textContent = Lg(`${d.length} tasas`, `${d.length} rates`);
+      const ctx = Plot.preparar($('#fit', c)), x1 = conLit ? 2.0 : 0.85, TT = Plot.ejes(ctx, { x0: 0, x1, y0: 0, y1: conLit ? 2.2 : 1.3, xlabel: 'z', ylabel: Lg('tasa de Ia (10⁻⁴ yr⁻¹ Mpc⁻³)', 'Ia rate (10⁻⁴ yr⁻¹ Mpc⁻³)') });
       for (const p of d) { const col = p.nuestra ? CL.Ia : '#8a93b8'; Plot.linea(ctx, TT, [p.z, p.z], [p.r - p.lo, p.r + p.hi], col, p.nuestra ? 2.5 : 1); Plot.puntos(ctx, TT, [p.z], [p.r], col, p.nuestra ? 5 : 3); }
       const zs = Array.from({ length: 50 }, (_, i) => 0.01 + (x1 - 0.01) * i / 49), mf = conv(beta, sfh);
       Plot.linea(ctx, TT, zs, zs.map(zz => r.K * mf(zz)), '#6ee7a0', 3);
@@ -336,16 +354,19 @@
     function leer() {
       const nm = sf => N[`sfh.paso3.todas+nuestras.${sf}.N_M`], bt = sf => N[`sfh.paso3.todas+nuestras.${sf}.beta`];
       $('#lectura', c).innerHTML = conLit
-        ? `<div class="panel"><p>Con la literatura, β queda acotado. La tesis (MF17): β = ${bt('MF17')} +${N['sfh.paso3.todas+nuestras.MF17.beta_mas']} −${N['sfh.paso3.todas+nuestras.MF17.beta_menos']},
-            N/M★ = ${nm('MF17')} × 10⁻³ M☉⁻¹, χ² ${N['sfh.paso3.todas+nuestras.MF17.chi2']} con ${N['sfh.paso3.todas+nuestras.MF17.dof']} grados de libertad.</p>
-            <p>Cambiar la SFH mueve N/M★ (${['H22_K', 'MF17', 'MD14_K', 'K21_K'].filter(sf => nm(sf)).map(sf => `${sf.replace('_K', '')} ${nm(sf)}`).join(', ')}) y casi no mueve β
+        ? `<div class="panel"><p>${Lg(`Con la literatura, β queda acotado. La tesis (MF17): β = ${bt('MF17')} +${N['sfh.paso3.todas+nuestras.MF17.beta_mas']} −${N['sfh.paso3.todas+nuestras.MF17.beta_menos']},
+            N/M★ = ${nm('MF17')} × 10⁻³ M☉⁻¹, χ² ${N['sfh.paso3.todas+nuestras.MF17.chi2']} con ${N['sfh.paso3.todas+nuestras.MF17.dof']} grados de libertad.`, `With the literature, β is constrained. The thesis (MF17): β = ${bt('MF17')} +${N['sfh.paso3.todas+nuestras.MF17.beta_mas']} −${N['sfh.paso3.todas+nuestras.MF17.beta_menos']},
+            N/M★ = ${nm('MF17')} × 10⁻³ M☉⁻¹, χ² ${N['sfh.paso3.todas+nuestras.MF17.chi2']} with ${N['sfh.paso3.todas+nuestras.MF17.dof']} degrees of freedom.`)}</p>
+            <p>${Lg('Cambiar la SFH mueve N/M★', 'Changing the SFH moves N/M★')} (${['H22_K', 'MF17', 'MD14_K', 'K21_K'].filter(sf => nm(sf)).map(sf => `${sf.replace('_K', '')} ${nm(sf)}`).join(', ')}) ${Lg('y casi no mueve β', 'and barely moves β')}
             (${['H22_K', 'MF17', 'MD14_K', 'K21_K'].filter(sf => bt(sf)).map(sf => bt(sf)).join(', ')}).</p>
-            <p>Los modelos de Greggio, contra el mejor (Δχ², MF17): ${Object.entries(T.sfh.dchi2_greggio).map(([k, v]) => `${k} ${f2(v, 1)}`).join(', ')}.
-            Los de doble degenerada ancha (DDW) quedan desfavorecidos.</p>
-            <p class="tenue">Tu χ² es el del juego: los errores de la literatura van simplificados (estadístico y sistemático en cuadratura, sin covarianzas). Los números de arriba son los de la tesis.</p></div>`
-        : `<div class="panel"><p>Con solo cuatro puntos hasta z = 0.75, la curva de Δχ² es casi plana: β no queda acotado.
+            <p>${Lg('Los modelos de Greggio, contra el mejor (Δχ², MF17):', 'The Greggio models against the best one (Δχ², MF17):')} ${Object.entries(T.sfh.dchi2_greggio).map(([k, v]) => `${k} ${f2(v, 1)}`).join(', ')}.
+            ${Lg('Los de doble degenerada ancha (DDW) quedan desfavorecidos.', 'The wide double-degenerate ones (DDW) are disfavoured.')}</p>
+            <p class="tenue">${Lg('Tu χ² es el del juego: los errores de la literatura van simplificados (estadístico y sistemático en cuadratura, sin covarianzas). Los números de arriba son los de la tesis.', 'Your χ² is the game one: the literature errors are simplified (statistical and systematic in quadrature, no covariances). The numbers above are the thesis ones.')}</p></div>`
+        : `<div class="panel"><p>${Lg(`Con solo cuatro puntos hasta z = 0.75, la curva de Δχ² es casi plana: β no queda acotado.
             La tesis encuentra lo mismo: β libre = ${N['sfh.paso2.beta_libre']}, ${N['sfh.paso2.beta_libre_acotado'] ? 'acotado' : 'sin cota'}. Con β fijo por modelo,
-            K de SD-Ch = ${N['sfh.paso2.sudare_t11_fina.SD-Ch.K']} ± ${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_est']} (est.) +${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_sist_mas']} −${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_sist_menos']} (sist.) × 10⁻³.</p></div>`;
+            K de SD-Ch = ${N['sfh.paso2.sudare_t11_fina.SD-Ch.K']} ± ${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_est']} (est.) +${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_sist_mas']} −${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_sist_menos']} (sist.) × 10⁻³.`, `With only four points up to z = 0.75, the Δχ² curve is almost flat: β is not constrained.
+            The thesis finds the same: free β = ${N['sfh.paso2.beta_libre']}, ${N['sfh.paso2.beta_libre_acotado'] ? 'constrained' : 'unconstrained'}. With β fixed per model,
+            K for SD-Ch = ${N['sfh.paso2.sudare_t11_fina.SD-Ch.K']} ± ${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_est']} (stat.) +${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_sist_mas']} −${N['sfh.paso2.sudare_t11_fina.SD-Ch.sK_sist_menos']} (sys.) × 10⁻³.`)}</p></div>`;
     }
     const tocar = k => { tocados.add(k); if (tocados.has('beta') && tocados.has('lit') && !$('#ccPanel', c)) expertaCC(); };
     $('#MF17', c).onclick = () => { sfh = 'MF17'; $('#MF17', c).classList.add('primario'); $('#MD14', c).classList.remove('primario'); dibujar(); };
@@ -358,29 +379,31 @@
     function expertaCC() {
       const cc = T.principal.bins.filter(b => b.tipo === 'CC' && b.z2 < 0.5), kcc = T.sfh.imf.Kroupa.K_CC_8_40;
       let fK = 1, fo = 0;
-      $('#cc', c).innerHTML = `<div class="panel" id="ccPanel"><h3>Experta: las CC y dos perillas</h3>
-        <p>La tasa CC predicha es K_CC ψ. Pero una parte de las CC se pierde detrás del polvo de sus galaxias (las ocultas). Mueve las dos perillas.</p>
-        <label class="control"><span>K_CC (× el de la IMF)</span><input type="range" id="fK" min="0.5" max="1.3" step="0.01" value="1"><output id="ofK">1.00</output></label>
-        <label class="control"><span>fracción oculta</span><input type="range" id="fo" min="0" max="0.5" step="0.01" value="0"><output id="ofo">0.00</output></label>
+      $('#cc', c).innerHTML = `<div class="panel" id="ccPanel"><h3>${Lg('Experta: las CC y dos perillas', 'Expert: the CC and two knobs')}</h3>
+        <p>${Lg('La tasa CC predicha es K_CC ψ. Pero una parte de las CC se pierde detrás del polvo de sus galaxias (las ocultas). Mueve las dos perillas.', 'The predicted CC rate is K_CC ψ. But some of the CC are lost behind the dust of their galaxies (the hidden ones). Move the two knobs.')}</p>
+        <label class="control"><span>${Lg('K_CC (× el de la IMF)', 'K_CC (× the IMF value)')}</span><input type="range" id="fK" min="0.5" max="1.3" step="0.01" value="1"><output id="ofK">1.00</output></label>
+        <label class="control"><span>${Lg('fracción oculta', 'hidden fraction')}</span><input type="range" id="fo" min="0" max="0.5" step="0.01" value="0"><output id="ofo">0.00</output></label>
         <canvas class="grafico" id="ccg"></canvas>
         <p id="ccl"></p>
-        <p><button class="primario" id="volver">Volver al observatorio</button></p></div>`;
+        <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button></p></div>`;
       const dib = () => {
-        const ctx = Plot.preparar($('#ccg', c)), TT = Plot.ejes(ctx, { x0: 0, x1: 0.5, y0: 0, y1: 2.6, xlabel: 'z', ylabel: 'tasa CC (10⁻⁴ yr⁻¹ Mpc⁻³)' });
+        const ctx = Plot.preparar($('#ccg', c)), TT = Plot.ejes(ctx, { x0: 0, x1: 0.5, y0: 0, y1: 2.6, xlabel: 'z', ylabel: Lg('tasa CC (10⁻⁴ yr⁻¹ Mpc⁻³)', 'CC rate (10⁻⁴ yr⁻¹ Mpc⁻³)') });
         const zs = Array.from({ length: 30 }, (_, i) => 0.01 + 0.49 * i / 29);
         Plot.linea(ctx, TT, zs, zs.map(zz => 1e4 * kcc * CO.psiMF17(zz)), 'rgba(240,96,93,0.4)', 2, [5, 4]);
         Plot.linea(ctx, TT, zs, zs.map(zz => 1e4 * fK * kcc * (1 - fo) * CO.psiMF17(zz)), CL.II, 3);
         for (const b of cc) { const zc = (b.z1 + b.z2) / 2; Plot.linea(ctx, TT, [zc, zc], [b.r_lo, b.r_hi], '#e8ecf8', 2); Plot.puntos(ctx, TT, [zc], [b.r], '#e8ecf8', 5); }
-        $('#ccl', c).innerHTML = `El producto es lo que cuenta: K_CC × (1 − f_oculta) = ${f2(fK * (1 - fo), 2)}. Muchas combinaciones dan la misma curva.
+        $('#ccl', c).innerHTML = Lg(`El producto es lo que cuenta: K_CC × (1 − f_oculta) = ${f2(fK * (1 - fo), 2)}. Muchas combinaciones dan la misma curva.
           Las tasas CC miden el producto K_CC ψ (1 − f), no cada factor. En la tesis, con MF17 y Kroupa, lo medido sobre lo predicho es
-          ${T.sfh.cc.MF17_Kroupa.cociente.map(x => f2(x)).join(' y ')}, y con la fracción de ocultas de Mattila et al. (2012), ${T.sfh.cc.MF17_Kroupa_ocultas.cociente.map(x => f2(x)).join(' y ')}.`;
+          ${T.sfh.cc.MF17_Kroupa.cociente.map(x => f2(x)).join(' y ')}, y con la fracción de ocultas de Mattila et al. (2012), ${T.sfh.cc.MF17_Kroupa_ocultas.cociente.map(x => f2(x)).join(' y ')}.`, `The product is what counts: K_CC × (1 − f_hidden) = ${f2(fK * (1 - fo), 2)}. Many combinations give the same curve.
+          CC rates measure the product K_CC ψ (1 − f), not each factor. In the thesis, with MF17 and Kroupa, measured over predicted is
+          ${T.sfh.cc.MF17_Kroupa.cociente.map(x => f2(x)).join(' and ')}, and with the hidden fraction of Mattila et al. (2012), ${T.sfh.cc.MF17_Kroupa_ocultas.cociente.map(x => f2(x)).join(' and ')}.`);
       };
       $('#fK', c).oninput = e => { fK = +e.target.value; $('#ofK', c).textContent = fK.toFixed(2); dib(); };
       $('#fo', c).oninput = e => { fo = +e.target.value; $('#ofo', c).textContent = fo.toFixed(2); dib(); };
       dib();
       u.desbloquear(m.ensena); u.marcar(m.id, true); u.sonar('fanfarria');
       $('#volver', c).onclick = () => fin({ gana: true });
-      u.hablar([['examinador3', 'Entonces, con solo SUDARE, ¿qué puede decir de β?'], ['yo', 'Que no lo acota: cuatro bines hasta z 0.75 no bastan. Con la literatura sí, y K depende de la SFH que elija.']]);
+      u.hablar([['examinador3', Lg('Entonces, con solo SUDARE, ¿qué puede decir de β?', 'So, with SUDARE alone, what can you say about β?')], ['yo', Lg('Que no lo acota: cuatro bines hasta z 0.75 no bastan. Con la literatura sí, y K depende de la SFH que elija.', 'That it does not constrain it: four bins up to z 0.75 are not enough. With the literature it does, and K depends on the SFH I choose.')]]);
     }
   }
 
@@ -388,12 +411,12 @@
   M.registrar('linea', linea);
   M.registrar('ajuste', ajuste);
   M.agregar([
-    { id: '6.1', cap: 6, titulo: 'El vivero', tipo: 'vivero', donde: 'cielo', ensena: ['imf'],
-      contrato: [['directora', 'Ya mides tasas. Ahora la pregunta de fondo: ¿de dónde vienen las supernovas? Sube a la cúpula y mira el cielo: ahí está la fábrica cósmica.']] },
-    { id: '6.2', cap: 6, titulo: 'Muchas generaciones', tipo: 'linea', donde: 'cielo', ensena: ['sfh'],
-      contrato: [['directora', 'Una generación no basta. El universo forma estrellas todo el tiempo. Mira desde la cúpula cómo se suman sus goteos.']] },
-    { id: '6.3', cap: 6, titulo: 'Los controles de la fábrica', tipo: 'ajuste', donde: 'cielo', ensena: ['dtd'],
-      contrato: [['directora', 'Ahora ajusta: mueve β, cambia la SFH y mira el χ². Primero con tus tasas solas, después con toda la literatura.']],
-      examinador3: [['examinador3', 'Cuando ajuste la DTD, vuelva. Le voy a preguntar qué acotan sus tasas y qué no.']] },
+    { id: '6.1', cap: 6, titulo: Lg('El vivero', 'The nursery'), tipo: 'vivero', donde: 'cielo', ensena: ['imf'],
+      contrato: [['directora', Lg('Ya mides tasas. Ahora la pregunta de fondo: ¿de dónde vienen las supernovas? Sube a la cúpula y mira el cielo: ahí está la fábrica cósmica.', 'You already measure rates. Now the deep question: where do supernovae come from? Go up to the dome and look at the sky: the cosmic factory is there.')]] },
+    { id: '6.2', cap: 6, titulo: Lg('Muchas generaciones', 'Many generations'), tipo: 'linea', donde: 'cielo', ensena: ['sfh'],
+      contrato: [['directora', Lg('Una generación no basta. El universo forma estrellas todo el tiempo. Mira desde la cúpula cómo se suman sus goteos.', 'One generation is not enough. The universe forms stars all the time. Watch from the dome how their drips add up.')]] },
+    { id: '6.3', cap: 6, titulo: Lg('Los controles de la fábrica', 'The factory controls'), tipo: 'ajuste', donde: 'cielo', ensena: ['dtd'],
+      contrato: [['directora', Lg('Ahora ajusta: mueve β, cambia la SFH y mira el χ². Primero con tus tasas solas, después con toda la literatura.', 'Now fit: move β, change the SFH and watch the χ². First with your rates alone, then with all the literature.')]],
+      examinador3: [['examinador3', Lg('Cuando ajuste la DTD, vuelva. Le voy a preguntar qué acotan sus tasas y qué no.', 'Come back once you have fitted the DTD. I will ask you what your rates constrain and what they do not.')]] },
   ]);
 })();
