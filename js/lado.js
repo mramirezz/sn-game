@@ -596,11 +596,18 @@
   bm.onclick = () => { Sonido.iniciar(); bm.textContent = Sonido.alternar() ? Lg('♪ sí', '♪ on') : Lg('♪ no', '♪ off'); };
   $('#abrirCuaderno').onclick = () => { Sonido.iniciar(); M.cuaderno(); };
   // jugar en horizontal: en Android se puede pedir pantalla completa y girar; si el navegador no deja, se explica
+  // el mismo botón deshace el giro: mientras el juego está girado (pantalla completa) sigue visible y vuelve a vertical
   $('#girar').onclick = async () => {
     Sonido.iniciar();
+    if (document.fullscreenElement) { try { screen.orientation.unlock(); } catch (e) { /* nada */ } return document.exitFullscreen().catch(() => {}); }
     try { await document.documentElement.requestFullscreen(); await screen.orientation.lock('landscape'); }
     catch (e) { decir([['yo', Lg('Para jugar en horizontal, gira el teléfono (con la rotación automática activada). El juego se acomoda solo.', 'To play in landscape, turn the phone (with auto-rotate on). The game adjusts on its own.')]]); }
   };
+  document.addEventListener('fullscreenchange', () => {
+    const girado = !!document.fullscreenElement;
+    document.body.classList.toggle('girado', girado);
+    $('#girar').title = girado ? Lg('Volver a vertical', 'Back to portrait') : Lg('Jugar en horizontal', 'Play in landscape');
+  });
   $('#cerrarCuaderno').onclick = () => M.cerrarCuaderno();
   $('#salirInstrumento').onclick = () => { callar(); M.salir(); };
 
