@@ -497,6 +497,8 @@
     $('#tituloCuaderno').hidden = !M.E.desbloqueados.length;
     $('#nueva').textContent = hay ? 'Nueva partida' : 'Comenzar';
     $('#tituloEstado').textContent = hay ? (m ? `Vas en la misión ${m.id}: ${m.titulo}` : 'Terminaste el juego: la defensa está aprobada') : '';
+    document.querySelectorAll('#titulo .menu .boton').forEach(b => b.classList.remove('activo'));
+    (hay ? $('#continuar') : $('#nueva')).classList.add('activo'); // la opción marcada al entrar
   }
   menuTitulo();
   function empezar(nueva) {
@@ -506,7 +508,9 @@
       $('#titulo').hidden = true; empezado = true;
       if (nueva) {
         escena = 'cerro'; vistos.clear(); yo.x = -30; yo.mira = 1; cam.x = 0; llegando = true;
-        pedirIr(160, () => { llegando = false; decir([['yo', 'El observatorio. Me esperan adentro.'], ['yo', 'Toco donde quiero caminar, y toco las marcas para mirar o hablar.']]); });
+        const comoSeJuega = matchMedia('(pointer: fine)').matches ? 'Camino con las flechas ← → (o tocando donde quiero ir), y miro o hablo con la barra espaciadora o tocando las marcas.'
+          : 'Camino con ◀ ▶ abajo o tocando donde quiero ir, y miro o hablo con el botón del medio o tocando las marcas.';
+        pedirIr(160, () => { llegando = false; decir([['yo', 'El observatorio. Me esperan adentro.'], ['yo', comoSeJuega]]); });
       } else decir([['yo', 'De vuelta en el observatorio. La flecha dorada me dice qué toca.']]);
       actualizarContador();
       $('#negro').style.opacity = 0;
@@ -520,6 +524,13 @@
     empezar(true);
   };
   $('#tituloCuaderno').onclick = () => { Sonido.iniciar(); M.cuaderno(); };
+  // el menú se maneja también con el teclado: flechas para moverse, Enter para elegir
+  addEventListener('keydown', ev => {
+    if (empezado || $('#titulo').hidden || !['ArrowUp', 'ArrowDown'].includes(ev.key)) return;
+    const bs = [...document.querySelectorAll('#titulo .menu button')].filter(b => !b.hidden), i = bs.indexOf(document.activeElement);
+    const j = i < 0 ? 0 : (i + (ev.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length;
+    bs[j].focus(); ev.preventDefault();
+  });
 
   // ---------- entrada ----------
   $('#marco').addEventListener('pointerdown', ev => {
@@ -540,6 +551,39 @@
     const destino = o ? (o.pie ?? (o.tipo === 'npc' ? o.x + (yo.x < o.x ? -40 : 40) : o.x)) : x;
     pedirIr(Math.max(E.limites[0], Math.min(E.limites[1], destino)), o ? () => usar(o) : null);
   });
+  // ---------- teclado y mando en pantalla: izquierda, derecha y acción ----------
+  // Mantener apretada una dirección camina hacia ese lado; soltar frena. La acción mira o habla con lo más cercano, o sigue el diálogo.
+  let dirTecla = 0;
+  const libre = () => empezado && !llegando && !M.abierto();
+  function mover(dir) {
+    if (!libre() || dialogo || dir === dirTecla) { if (!dir) dirTecla = 0; return; }
+    dirTecla = dir;
+    const E = ESCENAS[escena];
+    pedirIr(dir ? (dir > 0 ? E.limites[1] : E.limites[0]) : Math.max(E.limites[0], Math.min(E.limites[1], yo.x + yo.mira * 6)), null);
+  }
+  function accion() {
+    if (!libre()) return;
+    Sonido.iniciar();
+    if (dialogo) return avanzar();
+    const E = ESCENAS[escena], par = visibles(E).map(o => [o, Math.abs(o.x - yo.x)]).filter(([, d]) => d < 110).sort((a, b) => a[1] - b[1])[0];
+    if (!par) return decir([['yo', 'No hay nada aquí. Las marcas doradas y blancas son lo que se puede mirar.']]);
+    const o = par[0], destino = o.pie ?? (o.tipo === 'npc' ? o.x + (yo.x < o.x ? -40 : 40) : o.x);
+    pedirIr(Math.max(E.limites[0], Math.min(E.limites[1], destino)), () => usar(o));
+  }
+  const IZQ = ['ArrowLeft', 'a', 'A'], DER = ['ArrowRight', 'd', 'D'], ACC = [' ', 'Enter', 'e', 'E'];
+  addEventListener('keydown', ev => {
+    if (!libre() || ev.target.closest && ev.target.closest('input, textarea, select')) return;
+    if (IZQ.includes(ev.key)) { ev.preventDefault(); if (!ev.repeat) mover(-1); }
+    else if (DER.includes(ev.key)) { ev.preventDefault(); if (!ev.repeat) mover(1); }
+    else if (ACC.includes(ev.key) && !(ev.target.closest && ev.target.closest('button'))) { ev.preventDefault(); if (!ev.repeat) accion(); }
+  });
+  addEventListener('keyup', ev => { if ((IZQ.includes(ev.key) && dirTecla < 0) || (DER.includes(ev.key) && dirTecla > 0)) mover(0); });
+  for (const [id, dir] of [['#mIzq', -1], ['#mDer', 1]]) {
+    const b = $(id);
+    b.addEventListener('pointerdown', ev => { ev.preventDefault(); Sonido.iniciar(); b.setPointerCapture(ev.pointerId); mover(dir); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(n => b.addEventListener(n, () => { if (dirTecla === dir) mover(0); }));
+  }
+  $('#mAcc').addEventListener('pointerdown', ev => { ev.preventDefault(); accion(); }); // no 'click': el toque que cierra el diálogo caería en este botón recién aparecido
   const bm = $('#musica'); bm.textContent = Sonido.on ? '♪ sí' : '♪ no';
   bm.onclick = () => { Sonido.iniciar(); bm.textContent = Sonido.alternar() ? '♪ sí' : '♪ no'; };
   $('#abrirCuaderno').onclick = () => { Sonido.iniciar(); M.cuaderno(); };
@@ -654,7 +698,7 @@
     marcas(t);
     flechas(t);
     moverCamara(dt, yo.x);
-    if (!empezado) cieloTitulo.dibujar(t);
+    if (!empezado) $('#titulo').style.setProperty('--flash', cieloTitulo.dibujar(t).toFixed(3)); // el título brilla con la supernova
     requestAnimationFrame(bucle);
   }
   for (const [k, e] of Object.entries(ESCENAS)) { imagenes[k] = new Image(); imagenes[k].src = e.img; }

@@ -278,16 +278,57 @@ const Vista = (() => {
     return { agregar, dibujar };
   }
 
-  // ---------- el cielo de la pantalla de inicio: estrellas que titilan y, cada tanto, una supernova ----------
+  // ---------- la pantalla de inicio ----------
+  // El cerro de noche con un paneo lento, estrellas que titilan, estrellas fugaces y, cada tanto, una supernova que ilumina
+  // todo. En el camino, el astrónomo con su linterna mira el cielo. dibujar(t) devuelve el destello (0 a 1) para el título.
   function Titulo(cv) {
-    const r = U.rng(42), est = [...Array(150)].map(() => ({ x: r(), y: r() * 0.62, a: 0.25 + 0.75 * r(), f: r() * 6.3 }));
-    let prox = 1.5, sn = null;
+    const r = U.rng(42), est = [...Array(220)].map(() => ({ x: r(), y: r() * 0.55, a: 0.2 + 0.8 * r() ** 2, f: r() * 6.3, s: r() < 0.08 ? 2 : 1.2 }));
+    const fondo = new Image(); fondo.src = 'assets/fondos/cerro.png';
+    const atlas = new Image(); atlas.src = 'assets/sprites/astronomo_atlas.png';
+    let prox = 2.5, sn = null, fugaz = null, proxF = 4;
+    const SN = { x: 1010, y: 150 }; // dónde explota, en píxeles de la imagen del cerro (en la Vía Láctea)
+    const XA_H = 1080, XA_V = 430; // dónde está el astrónomo en el camino (horizontal y vertical)
     function dibujar(t) {
       const { g, w, h } = lienzo(cv);
-      g.clearRect(0, 0, w, h);
-      for (const s of est) { g.fillStyle = `rgba(230,236,255,${s.a * (0.45 + 0.55 * Math.sin(t * 1.6 + s.f) ** 2)})`; g.fillRect(s.x * w, s.y * h, 1.4, 1.4); }
-      if (t > prox) { sn = { x: 0.08 + 0.84 * r(), y: 0.05 + 0.3 * r(), t0: t }; prox = t + 3.5 + 4 * r(); }
-      if (sn) { const a = (t - sn.t0) / 2.4; if (a >= 1) sn = null; else supernova(g, sn.x * w, sn.y * h, a, 1.3); }
+      g.fillStyle = '#02030a'; g.fillRect(0, 0, w, h);
+      // el fondo: cubre la pantalla y se pasea despacio de lado a lado
+      let a = (x, y) => [x, y], k = 1;
+      if (fondo.complete && fondo.naturalWidth) {
+        const iw = 1344, ih = 752; k = Math.max(w / iw, h / ih) * 1.12;
+        // el paneo se mueve alrededor del astrónomo, para que siempre se vea (en vertical cabe poco del cerro)
+        const sobra = iw * k - w, xa = (h > w ? XA_V : XA_H) * k, centro = Math.max(-sobra, Math.min(0, (h > w ? 0.62 : 0.74) * w - xa));
+        const amp = Math.min(0.12 * w, centro + sobra, -centro), dx = centro + amp * Math.sin(t * 0.05), dy = (h - ih * k) * 0.55;
+        a = (x, y) => [dx + x * k, dy + y * k];
+        g.drawImage(fondo, dx, dy, iw * k, ih * k);
+      }
+      // la supernova: un destello que crece, ilumina el cielo y se apaga
+      if (t > prox) { sn = { t0: t }; prox = t + 9 + 5 * r(); }
+      let flash = 0;
+      if (sn) { const u = (t - sn.t0) / 3.2; if (u >= 1) sn = null; else flash = u < 0.12 ? u / 0.12 : Math.exp(-(u - 0.12) * 4); }
+      g.fillStyle = `rgba(2,3,10,${0.42 - 0.18 * flash})`; g.fillRect(0, 0, w, h); // la noche, que se aclara con el destello
+      // estrellas que titilan
+      for (const e of est) { g.fillStyle = `rgba(230,236,255,${e.a * (0.4 + 0.6 * Math.sin(t * 1.5 + e.f) ** 2)})`; g.fillRect(e.x * w, e.y * h, e.s, e.s); }
+      // una estrella fugaz de vez en cuando
+      if (t > proxF) { fugaz = { x: 0.15 + 0.6 * r(), y: 0.05 + 0.2 * r(), t0: t, ang: 0.35 + 0.3 * r() }; proxF = t + 5 + 6 * r(); }
+      if (fugaz) { const u = (t - fugaz.t0) / 0.9; if (u >= 1) fugaz = null; else {
+        const x0 = fugaz.x * w + u * w * 0.25 * Math.cos(fugaz.ang), y0 = fugaz.y * h + u * w * 0.25 * Math.sin(fugaz.ang), L = 70 * (1 - u);
+        const gr = g.createLinearGradient(x0, y0, x0 - L * Math.cos(fugaz.ang), y0 - L * Math.sin(fugaz.ang)); gr.addColorStop(0, `rgba(255,255,255,${0.9 * (1 - u)})`); gr.addColorStop(1, 'rgba(255,255,255,0)');
+        g.strokeStyle = gr; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 - L * Math.cos(fugaz.ang), y0 - L * Math.sin(fugaz.ang)); g.stroke(); } }
+      if (sn) { const [x, y] = a(SN.x, SN.y); const u = (t - sn.t0) / 3.2;
+        g.globalCompositeOperation = 'lighter'; luz(g, x, y, Math.max(w, h) * 0.45, '255,190,120', 0.25 * flash); g.globalCompositeOperation = 'source-over';
+        supernova(g, x, y, u, Math.max(1.4, k * 2.2)); }
+      // el astrónomo en el camino, quieto, mirando el cielo con su linterna
+      const M = window.ANIM;
+      if (M && atlas.complete && atlas.naturalWidth) {
+        const c = M._celda, Q = M.quieto, i = Math.floor(t * 12) % Q.celdas.length, cel = Q.celdas[i], [px, py] = a(h > w ? XA_V : XA_H, 664), ks = k * 2;
+        g.save(); g.translate(px, py); g.scale(ks, ks); g.imageSmoothingEnabled = false;
+        g.fillStyle = 'rgba(0,0,0,0.45)'; g.beginPath(); g.ellipse(0, 0, 14, 3, 0, 0, 7); g.fill();
+        g.drawImage(atlas, (cel % c.cols) * c.w, Math.floor(cel / c.cols) * c.h, c.w, c.h, -c.torsoX, -c.pieY, c.w, c.h);
+        g.restore();
+        const ll = Q.llama[i];
+        if (ll) { const lx = px + (ll[0] - c.torsoX) * ks, ly = py + (ll[1] - c.pieY) * ks; g.globalCompositeOperation = 'lighter'; luz(g, lx, ly, 70 * ks / 2, '255,190,110', 0.55 + 0.08 * Math.sin(t * 9)); g.globalCompositeOperation = 'source-over'; }
+      }
+      return flash;
     }
     return { dibujar };
   }

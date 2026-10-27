@@ -6,7 +6,7 @@
   <title>Tiempo de control</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="css/instrumento.css?v=11">
+  <link rel="stylesheet" href="css/instrumento.css?v=13">
   <style>
     @font-face { font-family: Pixel; src: url('vendor/fonts/PressStart2P-Regular.ttf'); }
     @font-face { font-family: 'Pixelify Sans'; font-weight: 400 700; src: url('vendor/fonts/PixelifySans-latin.woff2') format('woff2'); } /* los diálogos: pixel art y legible, con tildes y ñ */
@@ -34,23 +34,39 @@
     #caja .sigue { position: absolute; right: 8px; bottom: 4px; font-family: Pixel; font-size: 9px; animation: parpadeo 1s steps(2) infinite; }
     @keyframes parpadeo { 50% { opacity: 0; } }
     #negro { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .35s; z-index: 10; }
-    /* pantalla de inicio: el cerro de noche que se acerca despacio, estrellas que titilan y una supernova cada tanto */
-    #titulo { position: absolute; inset: 0; z-index: 8; overflow: hidden; background: #02030a; display: flex; align-items: center; justify-content: center; font-family: Pixel; text-align: center; }
-    #titulo .fondo { position: absolute; inset: -3%; background: url('assets/fondos/cerro.png') 22% center / cover no-repeat; /* en vertical, que se vea el observatorio */ filter: brightness(.55); animation: acerca 40s ease-in-out infinite alternate; }
-    @keyframes acerca { from { transform: scale(1); } to { transform: scale(1.08) translateY(-1.5%); } }
-    #titulo .velo { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0) 0%, rgba(0,0,0,.5) 65%, rgba(0,0,0,.85) 100%); }
+    /* pantalla de inicio: la escena animada en el canvas (vista.js, Titulo) y encima el título y un menú de RPG */
+    #titulo { position: fixed; inset: 0; z-index: 8; overflow: hidden; background: #02030a; display: flex; align-items: center; justify-content: center; font-family: Pixel; text-align: center; --flash: 0; }
+    #titulo .velo { position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(rgba(2,3,10,.55), rgba(2,3,10,0) 22%, rgba(2,3,10,0) 55%, rgba(2,3,10,.75)), radial-gradient(ellipse at 50% 45%, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 45%); }
     #cieloTitulo { position: absolute; inset: 0; width: 100%; height: 100%; }
-    #titulo .tit { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px; }
-    #titulo h1 { margin: 0; font-size: clamp(18px, 4.2vw, 30px); line-height: 1.4; color: #ffb84d; font-weight: 400; letter-spacing: .04em;
-      text-shadow: 3px 3px 0 #5a2a00, 0 0 18px rgba(255,184,77,.45); }
-    #titulo .sub { margin: 0 0 12px; font-family: system-ui, sans-serif; font-size: 14px; color: #e8d8b0; }
-    #titulo .menu { display: flex; flex-direction: column; gap: 10px; min-width: 230px; }
-    #titulo .boton { font-size: 11px; padding: 12px 18px; background: rgba(20,14,10,.85); }
-    #titulo .boton:hover, #titulo .boton:focus-visible { border-color: #ffb84d; color: #ffb84d; }
-    #titulo .boton.chico { font-size: 9px; padding: 8px 14px; }
-    #titulo .estado { margin: 4px 0 0; font-family: system-ui, sans-serif; font-size: 13px; color: #c9b48a; min-height: 1em; }
+    #titulo .tit { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 16px; animation: entra 1.4s ease-out both; }
+    @keyframes entra { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    #titulo .pre { margin: 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: clamp(12px, 1.3vw, 15px); letter-spacing: .3em; color: #c9b48a; text-transform: uppercase; text-shadow: 0 2px 0 #000; } /* la pixel del título no tiene Í */
+    #titulo h1 { margin: 0; font-size: clamp(22px, 5.4vw, 52px); line-height: 1.25; color: #ffb84d; font-weight: 400; letter-spacing: .05em;
+      text-shadow: 3px 3px 0 #5a2a00, 6px 6px 0 rgba(0,0,0,.6), 0 0 calc(18px + 40px * var(--flash)) rgba(255,184,77,calc(.4 + .5 * var(--flash))); }
+    #titulo h1 span { display: inline-block; }
+    #titulo .sub { margin: 0 0 6px; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: clamp(15px, 1.6vw, 20px); color: #e8d8b0; text-shadow: 0 2px 0 #000; }
+    #titulo .menu { display: flex; flex-direction: column; gap: 4px; min-width: min(300px, 80vw); padding: 10px; background: rgba(12,9,8,.78);
+      border: 2px solid #c9b48a; box-shadow: 0 0 0 2px #000, inset 0 0 0 2px #3a2a1a, 0 10px 30px rgba(0,0,0,.6); }
+    #titulo .boton { position: relative; font-size: clamp(11px, 1.2vw, 14px); padding: 12px 16px 12px 34px; text-align: left; background: transparent; border: 2px solid transparent; color: #e8ecf8; cursor: pointer; }
+    #titulo .boton::before { content: '▶'; position: absolute; left: 12px; color: #ffb84d; opacity: 0; }
+    #titulo .boton:hover, #titulo .boton:focus-visible, #titulo .boton.activo { color: #ffb84d; background: rgba(255,184,77,.08); border-color: rgba(255,184,77,.35); outline: none; }
+    #titulo .boton:hover::before, #titulo .boton:focus-visible::before, #titulo .boton.activo::before { opacity: 1; animation: parpadeo 1s steps(2) infinite; }
+    #titulo .boton.chico { font-size: clamp(10px, 1vw, 12px); }
+    #titulo .menu:hover .boton.activo:not(:hover), #titulo .menu:focus-within .boton.activo:not(:focus-visible):not(:hover) { color: #e8ecf8; background: transparent; border-color: transparent; }
+    #titulo .menu:hover .boton.activo:not(:hover)::before, #titulo .menu:focus-within .boton.activo:not(:focus-visible):not(:hover)::before { opacity: 0; }
+    #titulo .estado { margin: 2px 0 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: 15px; color: #c9b48a; min-height: 1em; text-shadow: 0 2px 0 #000; }
+    #titulo .pie-titulo { position: absolute; bottom: 10px; left: 0; right: 0; margin: 0; font-family: 'Pixelify Sans', system-ui, sans-serif; font-size: 13px; color: rgba(232,216,176,.7); text-shadow: 0 2px 0 #000; }
     #titulo[hidden] { display: none; }
     #cuaderno { z-index: 9; } /* el cuaderno se puede abrir desde el inicio */
+    /* el mando en pantalla: solo con dedo, y solo al caminar (sin diálogo ni instrumento) */
+    #mando { display: none; position: absolute; left: 10px; right: 10px; bottom: 14px; justify-content: space-between; align-items: center; z-index: 5; pointer-events: none; }
+    @media (pointer: coarse) { #mando { display: flex; } }
+    body.con-dialogo #mando, body.con-panel #mando { display: none; }
+    #mando button { pointer-events: auto; width: 64px; height: 64px; font: 24px/1 system-ui, sans-serif; border-radius: 50%; background: rgba(8,8,16,.55); touch-action: none; -webkit-user-select: none; user-select: none; }
+    #mando #mAcc { width: 56px; height: 56px; color: #ffb84d; }
+    #mando .cruz { display: flex; gap: 14px; } /* como un mando: dirección a la izquierda, acción a la derecha */
+    #mando button:active { background: rgba(255,184,77,.25); }
     /* el aviso de que se puede jugar en horizontal: solo con el teléfono vertical */
     .girar { display: none; }
     @media (orientation: portrait) { .girar { display: inline-flex; align-items: center; gap: 6px; } }
@@ -74,47 +90,50 @@
       <div class="cabeza"><span class="titulo">Cuaderno</span><button class="px" id="cerrarCuaderno">✕ Cerrar</button></div>
       <div class="contenido"></div>
     </section>
+    <div id="mando"><span class="cruz"><button class="px" id="mIzq" aria-label="Caminar a la izquierda">◀</button><button class="px" id="mDer" aria-label="Caminar a la derecha">▶</button></span><button class="px" id="mAcc" aria-label="Mirar o hablar">●</button></div>
     <div id="caja"><canvas id="retrato" width="56" height="56"></canvas><div><div class="quien"></div><div class="texto"></div></div><span class="sigue">▼</span></div>
     <div id="negro"></div>
     <div id="titulo">
-      <div class="fondo"></div><canvas id="cieloTitulo"></canvas><div class="velo"></div>
+      <canvas id="cieloTitulo"></canvas><div class="velo"></div>
       <div class="tit">
-        <h1>TIEMPO DE CONTROL</h1>
+        <p class="pre">una aventura de astronomía</p>
+        <h1><span>TIEMPO</span> <span>DE CONTROL</span></h1>
         <p class="sub">Cuántas supernovas explotan en el universo, y cómo se sabe</p>
-        <div class="menu">
+        <nav class="menu" aria-label="Menú">
           <button class="px boton" id="continuar" hidden>Continuar</button>
           <button class="px boton" id="nueva">Comenzar</button>
           <button class="px boton chico" id="tituloCuaderno" hidden>Cuaderno</button>
-        </div>
+        </nav>
         <p class="estado" id="tituloEstado"></p>
         <p class="girar aviso-girar"><span class="telefono gira"></span>También se juega en horizontal: gira el teléfono</p>
       </div>
+      <p class="pie-titulo">8 capítulos · 24 misiones · de contar supernovas a la tasa de una tesis</p>
     </div>
   </div>
   <script src="vendor/katex/katex.min.js"></script>
-  <script src="js/fisica.js?v=11"></script>
-  <script src="js/universo.js?v=11"></script>
-  <script src="js/plot.js?v=11"></script>
-  <script src="js/vista.js?v=11"></script>
-  <script src="js/cuaderno.js?v=11"></script>
-  <script src="data/plantillas.js?v=11"></script>
-  <script src="data/sudare1.js?v=11"></script>
-  <script src="data/tesis.js?v=11"></script>
-  <script src="data/espectro.js?v=11"></script>
-  <script src="js/cuaderno2.js?v=11"></script>
-  <script src="js/poblacion.js?v=11"></script>
-  <script src="js/cosmos.js?v=11"></script>
-  <script src="js/misiones.js?v=11"></script>
-  <script src="js/vista2.js?v=11"></script>
-  <script src="js/escenas.js?v=11"></script>
-  <script src="js/misiones2.js?v=11"></script>
-  <script src="js/cap3.js?v=11"></script>
-  <script src="js/cap4.js?v=11"></script>
-  <script src="js/cap5.js?v=11"></script>
-  <script src="js/cap6.js?v=11"></script>
-  <script src="js/cap7.js?v=11"></script>
-  <script src="assets/sprites/meta.js?v=11"></script>
-  <script src="assets/sprites/astronomo_anim.js?v=11"></script>
-  <script src="js/lado.js?v=11"></script>
+  <script src="js/fisica.js?v=13"></script>
+  <script src="js/universo.js?v=13"></script>
+  <script src="js/plot.js?v=13"></script>
+  <script src="js/vista.js?v=13"></script>
+  <script src="js/cuaderno.js?v=13"></script>
+  <script src="data/plantillas.js?v=13"></script>
+  <script src="data/sudare1.js?v=13"></script>
+  <script src="data/tesis.js?v=13"></script>
+  <script src="data/espectro.js?v=13"></script>
+  <script src="js/cuaderno2.js?v=13"></script>
+  <script src="js/poblacion.js?v=13"></script>
+  <script src="js/cosmos.js?v=13"></script>
+  <script src="js/misiones.js?v=13"></script>
+  <script src="js/vista2.js?v=13"></script>
+  <script src="js/escenas.js?v=13"></script>
+  <script src="js/misiones2.js?v=13"></script>
+  <script src="js/cap3.js?v=13"></script>
+  <script src="js/cap4.js?v=13"></script>
+  <script src="js/cap5.js?v=13"></script>
+  <script src="js/cap6.js?v=13"></script>
+  <script src="js/cap7.js?v=13"></script>
+  <script src="assets/sprites/meta.js?v=13"></script>
+  <script src="assets/sprites/astronomo_anim.js?v=13"></script>
+  <script src="js/lado.js?v=13"></script>
 </body>
 </html>
