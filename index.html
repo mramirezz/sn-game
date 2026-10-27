@@ -6,7 +6,7 @@
   <title>SN Rates</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="css/instrumento.css?v=16">
+  <link rel="stylesheet" href="css/instrumento.css?v=17">
   <style>
     @font-face { font-family: Pixel; src: url('vendor/fonts/PressStart2P-Regular.ttf'); }
     @font-face { font-family: 'Pixelify Sans'; font-weight: 400 700; src: url('vendor/fonts/PixelifySans-latin.woff2') format('woff2'); } /* los diálogos: pixel art y legible, con tildes y ñ */
@@ -67,8 +67,6 @@
     @media (pointer: coarse) { #mando { display: flex; } }
     body.con-dialogo #mando, body.con-panel #mando { display: none; }
     #mando button { pointer-events: auto; width: 64px; height: 64px; font: 24px/1 system-ui, sans-serif; border-radius: 50%; background: rgba(8,8,16,.55); touch-action: none; -webkit-user-select: none; user-select: none; }
-    #mando #mAcc { width: 56px; height: 56px; color: #ffb84d; }
-    #mando .cruz { display: flex; gap: 14px; } /* como un mando: dirección a la izquierda, acción a la derecha */
     #mando button:active { background: rgba(255,184,77,.25); }
     /* el aviso de que se puede jugar en horizontal: solo con el teléfono vertical */
     .girar { display: none; }
@@ -93,7 +91,7 @@
       <div class="cabeza"><span class="titulo" data-en="Notebook">Cuaderno</span><button class="px" id="cerrarCuaderno" data-en="✕ Close">✕ Cerrar</button></div>
       <div class="contenido"></div>
     </section>
-    <div id="mando"><span class="cruz"><button class="px" id="mIzq" aria-label="Caminar a la izquierda" data-en-aria="Walk left">◀</button><button class="px" id="mDer" aria-label="Caminar a la derecha" data-en-aria="Walk right">▶</button></span><button class="px" id="mAcc" aria-label="Mirar o hablar" data-en-aria="Look or talk">●</button></div>
+    <div id="mando"><button class="px" id="mIzq" aria-label="Caminar a la izquierda" data-en-aria="Walk left">◀</button><button class="px" id="mDer" aria-label="Caminar a la derecha" data-en-aria="Walk right">▶</button></div>
     <div id="caja"><canvas id="retrato" width="56" height="56"></canvas><div><div class="quien"></div><div class="texto"></div></div><span class="sigue">▼</span></div>
     <div id="negro"></div>
     <div id="titulo">
@@ -115,31 +113,31 @@
     </div>
   </div>
   <script src="vendor/katex/katex.min.js"></script>
-  <script src="js/idioma.js?v=16"></script>
-  <script src="js/fisica.js?v=16"></script>
-  <script src="js/universo.js?v=16"></script>
-  <script src="js/plot.js?v=16"></script>
-  <script src="js/vista.js?v=16"></script>
-  <script src="js/cuaderno.js?v=16"></script>
-  <script src="data/plantillas.js?v=16"></script>
-  <script src="data/sudare1.js?v=16"></script>
-  <script src="data/tesis.js?v=16"></script>
-  <script src="data/etiquetas.js?v=16"></script>
-  <script src="data/espectro.js?v=16"></script>
-  <script src="js/cuaderno2.js?v=16"></script>
-  <script src="js/poblacion.js?v=16"></script>
-  <script src="js/cosmos.js?v=16"></script>
-  <script src="js/misiones.js?v=16"></script>
-  <script src="js/vista2.js?v=16"></script>
-  <script src="js/escenas.js?v=16"></script>
-  <script src="js/misiones2.js?v=16"></script>
-  <script src="js/cap3.js?v=16"></script>
-  <script src="js/cap4.js?v=16"></script>
-  <script src="js/cap5.js?v=16"></script>
-  <script src="js/cap6.js?v=16"></script>
-  <script src="js/cap7.js?v=16"></script>
-  <script src="assets/sprites/meta.js?v=16"></script>
-  <script src="assets/sprites/astronomo_anim.js?v=16"></script>
-  <script src="js/lado.js?v=16"></script>
+  <script src="js/idioma.js?v=17"></script>
+  <script src="js/fisica.js?v=17"></script>
+  <script src="js/universo.js?v=17"></script>
+  <script src="js/plot.js?v=17"></script>
+  <script src="js/vista.js?v=17"></script>
+  <script src="js/cuaderno.js?v=17"></script>
+  <script src="data/plantillas.js?v=17"></script>
+  <script src="data/sudare1.js?v=17"></script>
+  <script src="data/tesis.js?v=17"></script>
+  <script src="data/etiquetas.js?v=17"></script>
+  <script src="data/espectro.js?v=17"></script>
+  <script src="js/cuaderno2.js?v=17"></script>
+  <script src="js/poblacion.js?v=17"></script>
+  <script src="js/cosmos.js?v=17"></script>
+  <script src="js/misiones.js?v=17"></script>
+  <script src="js/vista2.js?v=17"></script>
+  <script src="js/escenas.js?v=17"></script>
+  <script src="js/misiones2.js?v=17"></script>
+  <script src="js/cap3.js?v=17"></script>
+  <script src="js/cap4.js?v=17"></script>
+  <script src="js/cap5.js?v=17"></script>
+  <script src="js/cap6.js?v=17"></script>
+  <script src="js/cap7.js?v=17"></script>
+  <script src="assets/sprites/meta.js?v=17"></script>
+  <script src="assets/sprites/astronomo_anim.js?v=17"></script>
+  <script src="js/lado.js?v=17"></script>
 </body>
 </html>

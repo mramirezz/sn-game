@@ -509,7 +509,7 @@
       if (nueva) {
         escena = 'cerro'; vistos.clear(); yo.x = -30; yo.mira = 1; cam.x = 0; llegando = true;
         const comoSeJuega = matchMedia('(pointer: fine)').matches ? Lg('Camino con las flechas ← → (o tocando donde quiero ir), y miro o hablo con la barra espaciadora o tocando las marcas.', 'I walk with the arrow keys ← → (or by clicking where I want to go), and I look or talk with the space bar or by clicking the marks.')
-          : Lg('Camino con ◀ ▶ abajo o tocando donde quiero ir, y miro o hablo con el botón del medio o tocando las marcas.', 'I walk with ◀ ▶ at the bottom or by tapping where I want to go, and I look or talk with the middle button or by tapping the marks.');
+          : Lg('Camino con ◀ ▶ abajo o tocando donde quiero ir, y miro o hablo tocando las marcas.', 'I walk with ◀ ▶ at the bottom or by tapping where I want to go, and I look or talk by tapping the marks.');
         pedirIr(160, () => { llegando = false; decir([['yo', Lg('El observatorio. Me esperan adentro.', 'The observatory. They are waiting for me inside.')], ['yo', comoSeJuega]]); });
       } else decir([['yo', Lg('De vuelta en el observatorio. La flecha dorada me dice qué toca.', 'Back at the observatory. The golden arrow tells me what comes next.')]]);
       actualizarContador();
@@ -552,14 +552,23 @@
     pedirIr(Math.max(E.limites[0], Math.min(E.limites[1], destino)), o ? () => usar(o) : null);
   });
   // ---------- teclado y mando en pantalla: izquierda, derecha y acción ----------
-  // Mantener apretada una dirección camina hacia ese lado; soltar frena. La acción mira o habla con lo más cercano, o sigue el diálogo.
+  // Mantener apretada una dirección camina hacia ese lado; soltar frena. La acción (espacio o Enter) mira o habla con lo más cercano,
+  // o sigue el diálogo. En el teléfono no hay botón de acción: se tocan las marcas.
   let dirTecla = 0;
   const libre = () => empezado && !llegando && !M.abierto();
   function mover(dir) {
     if (!libre() || dialogo || dir === dirTecla) { if (!dir) dirTecla = 0; return; }
     dirTecla = dir;
     const E = ESCENAS[escena];
-    pedirIr(dir ? (dir > 0 ? E.limites[1] : E.limites[0]) : Math.max(E.limites[0], Math.min(E.limites[1], yo.x + yo.mira * 6)), null);
+    if (dir) pedirIr(dir > 0 ? E.limites[1] : E.limites[0], null); else frenarYa();
+  }
+  // Al soltar la flecha se para ya, no al cerrar el ciclo: si recién arrancaba vuelve a quedarse quieto (un toque corto casi no
+  // mueve), y si iba caminando frena desde la mitad del frenado (unas 30 unidades en vez de un ciclo más 54).
+  function frenarYa() {
+    yo.otraVez = false; yo.alLlegar = null; yo.apurado = false;
+    if (ani.nombre === 'arranca' && ani.i < 14) { poner('quieto', 0, 4); return llegar(); }
+    if (ani.nombre === 'arranca' || ani.nombre === 'camina') { yo.meta = null; return poner('frena', 12, 4); }
+    yo.meta = yo.x; // ya va frenando, dando un paso o dándose vuelta: termina eso y se queda
   }
   function accion() {
     if (!libre()) return;
@@ -583,7 +592,6 @@
     b.addEventListener('pointerdown', ev => { ev.preventDefault(); Sonido.iniciar(); b.setPointerCapture(ev.pointerId); mover(dir); });
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(n => b.addEventListener(n, () => { if (dirTecla === dir) mover(0); }));
   }
-  $('#mAcc').addEventListener('pointerdown', ev => { ev.preventDefault(); accion(); }); // no 'click': el toque que cierra el diálogo caería en este botón recién aparecido
   const bm = $('#musica'); bm.textContent = Sonido.on ? Lg('♪ sí', '♪ on') : Lg('♪ no', '♪ off');
   bm.onclick = () => { Sonido.iniciar(); bm.textContent = Sonido.alternar() ? Lg('♪ sí', '♪ on') : Lg('♪ no', '♪ off'); };
   $('#abrirCuaderno').onclick = () => { Sonido.iniciar(); M.cuaderno(); };
