@@ -22,7 +22,12 @@ const Misiones = (() => {
   function cargar() {
     try {
       const s = JSON.parse(localStorage.getItem(CLAVE));
-      if (s && Array.isArray(s.desbloqueados)) return { ...nuevo(), ...s };
+      if (s && Array.isArray(s.desbloqueados)) {
+        const e = { ...nuevo(), ...s };
+        if (e.misiones['0.1'] && !e.desbloqueados.includes('contar')) e.desbloqueados.unshift('contar');
+        if (e.ejemplos.tasa && !e.ejemplos.contar && /galaxia|galaxy/.test(e.ejemplos.tasa)) { e.ejemplos.contar = e.ejemplos.tasa; delete e.ejemplos.tasa; }
+        return e;
+      }
     } catch (e) { /* navegador privado o datos rotos: parte de cero */ }
     return nuevo();
   }
@@ -63,7 +68,7 @@ const Misiones = (() => {
   // ---------- misiones (diseño, sección 6, cap. 0 y 1) ----------
   // contrato: lo que dice la directora al darla. abre: lo que se dice al abrir el instrumento.
   const MISIONES = [
-    { id: '0.1', cap: 0, titulo: Lg('Una galaxia', 'One galaxy'), tipo: 'galaxia', donde: 'telescopio', ensena: ['tasa'],
+    { id: '0.1', cap: 0, titulo: Lg('Una galaxia', 'One galaxy'), tipo: 'galaxia', donde: 'telescopio', ensena: ['contar'],
       contrato: [
         ['directora', Lg('Llegaste. Soy Inés, la directora del observatorio.', 'You made it. I am Inés, the director of the observatory.')],
         ['directora', Lg('Aquí medimos cuántas supernovas explotan por año en el universo. Eso se llama una tasa.', 'Here we measure how many supernovae explode per year in the universe. That is called a rate.')],
@@ -213,11 +218,11 @@ const Misiones = (() => {
         ['directora', Lg('Eso es una tasa: cuántas pasaron, dividido por el tiempo que miraste. En la Vía Láctea son unas pocas por siglo, y el polvo esconde la mayoría.', 'That is a rate: how many happened, divided by the time you watched. In the Milky Way it is a few per century, and dust hides most of them.')],
         ['directora', Lg('Por eso nadie mide tasas mirando una galaxia: hay que mirar miles a la vez. Baja a verme cuando quieras.', 'That is why nobody measures rates by watching one galaxy. You have to watch thousands at once. Come down and see me whenever you like.')],
       ], () => {
-        E.ejemplos.tasa = Lg(`en tu galaxia contaste ${Nn} supernovas en ${Tn} años: ${Nn} / ${Tn} = ${(Nn / Tn).toFixed(4)} por año, ${porSiglo.toFixed(1)} por siglo. La verdadera era 2 por siglo (universo de juego).`,
+        E.ejemplos.contar = Lg(`en tu galaxia contaste ${Nn} supernovas en ${Tn} años: ${Nn} / ${Tn} = ${(Nn / Tn).toFixed(4)} por año, ${porSiglo.toFixed(1)} por siglo. La verdadera era 2 por siglo (universo de juego).`,
           `in your galaxy you counted ${Nn} ${sne(Nn)} in ${Tn} years: ${Nn} / ${Tn} = ${(Nn / Tn).toFixed(4)} per year, ${porSiglo.toFixed(1)} per century. The true rate was 2 per century (game universe).`);
         const nuevos = desbloquear(m.ensena); marcar(m.id, true); sonar('fanfarria');
         $('#fin', c).innerHTML = `<div class="panel premio">${Lg('Misión 0.1 lista. +10 ciencia.', 'Mission 0.1 complete. +10 science.')}
-          ${nuevos.length ? `<br>${Lg('Nueva página en tu cuaderno: <b>La tasa</b>', 'New page in your notebook: <b>The rate</b>')}, ${enlaceCuaderno('tasa')}.` : ''}
+          ${nuevos.length ? `<br>${Lg('Nueva página en tu cuaderno: <b>Contar</b>', 'New page in your notebook: <b>Counting</b>')}, ${enlaceCuaderno('contar')}.` : ''}
           <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button></p></div>`;
         enlazar();
         $('#volver', c).onclick = () => fin({ gana: true });
@@ -279,13 +284,15 @@ const Misiones = (() => {
       const r = N / V / 1e-4;
       E.ejemplos.tasa = Lg(`en un cubo de 10⁶ Mpc³ contaste ${N} Ia en un año: r = ${f2(r)} × 10⁻⁴ yr⁻¹ Mpc⁻³. La verdadera era ${f2(tasa)} × 10⁻⁴ (universo de juego).`,
         `in a cube of 10⁶ Mpc³ you counted ${N} Ia in one year: r = ${f2(r)} × 10⁻⁴ yr⁻¹ Mpc⁻³. The true rate was ${f2(tasa)} × 10⁻⁴ (game universe).`);
-      desbloquear(m.ensena); marcar(m.id, true); sonar('fanfarria');
+      const nuevos = desbloquear(m.ensena); marcar(m.id, true); sonar('fanfarria');
       $('#fin', c).innerHTML = `<div class="panel">
+        ${nuevos.length ? `<p>${Lg('Nueva página en tu cuaderno: <b>La tasa por volumen</b>', 'New page in your notebook: <b>The rate per volume</b>')}, ${enlaceCuaderno('tasa')}.</p>` : ''}
         <p>${Lg('Tu tasa', 'Your rate')}: <b>${f2(r)} × 10⁻⁴</b> yr⁻¹ Mpc⁻³. ${Lg('La verdadera', 'The true one')}: <b>${f2(tasa)} × 10⁻⁴</b> ${marca}.</p>
         <p>${Lg(`Aunque viste todas las que explotaron, tu tasa no tiene por qué ser la verdadera: las explosiones caen al azar, y en un año salieron ${N} cuando el promedio es ${f2(porAno, 1)}.`,
           `You saw every one that exploded, and still your rate need not be the true one. Explosions happen at random, and in one year you got ${N} when the average is ${f2(porAno, 1)}.`)}</p>
         <p class="tenue">${Lg('Fíjate en el tamaño del número: 10⁻⁴ por año por Mpc³. Hay que mirar un millón de Mpc³ para ver unas decenas de Ia por año.', 'Look at the size of the number: 10⁻⁴ per year per Mpc³. You have to watch a million Mpc³ to see a few tens of Ia per year.')}</p>
         <p><button class="primario" id="volver">${Lg('Volver al observatorio', 'Back to the observatory')}</button></p></div>`;
+      enlazar();
       $('#volver', c).onclick = () => fin({ gana: true });
       hablar([['directora', Lg('Esa diferencia con la verdadera no es un error tuyo. Es el ruido de contar. Baja y te muestro cuánto pesa.', 'That difference from the true rate is not your mistake. It is counting noise. Come down and I will show you how much it matters.')]]);
     }
@@ -303,6 +310,7 @@ const Misiones = (() => {
         en la columna de lo que contaste. A la derecha aparece su tasa con su barra de error.`,
         `The same cube, the same laws, six weeks of observing. Each universe you observe drops as a block
         into the column of what you counted. On the right you see its rate with its error bar.`)}</p>
+      <p class="tenue pie" id="leyenda"></p>
       <div class="fila"><button class="primario" id="uno">${Lg('Observar 1 universo', 'Observe 1 universe')}</button><button id="diez" hidden>${Lg('Observar 10', 'Observe 10')}</button>
         <button id="cien" hidden>${Lg('Observar 100', 'Observe 100')}</button><span class="dato">${Lg('Universos', 'Universes')}: <b id="n">0</b></span>${marca}</div>
       <div id="ultimo" class="panel tenue">${Lg('Observa un universo.', 'Observe a universe.')}</div>
@@ -327,12 +335,23 @@ const Misiones = (() => {
       const k0 = cuentas[cuentas.length - 1], g = F.gehrels(k0), nU = cuentas.length;
       const media = cuentas.reduce((a, b) => a + b, 0) / nU;
       $('#n', c).textContent = nU;
-      $('#ultimo', c).innerHTML = Lg(`<p>Último universo: contaste <b>${k0}</b> Ia en seis semanas. Su tasa es <b>${f2(k0 * kRate)}</b> × 10⁻⁴ yr⁻¹ Mpc⁻³,
-        con barra de Gehrels a 1σ de <b>${f2(g.lo * kRate)}</b> a <b>${f2(g.hi * kRate)}</b>: −${f2((k0 - g.lo) * kRate)} hacia abajo y +${f2((g.hi - k0) * kRate)} hacia arriba.</p>
+      // la cuenta de la barra del último universo, paso a paso y con sus números
+      const tAnos = f2(T, 3), raiz = Math.sqrt(k0), nSobre = k0 ? Lg(` Con N = ${k0} el σ sería √${k0} = ${f2(raiz)}, y N ± σ daría de ${f2(k0 - raiz)} a ${f2(k0 + raiz)}: con tan pocas, Poisson no es simétrica y ese ± queda corto hacia arriba.`,
+        ` With N = ${k0} the σ would be √${k0} = ${f2(raiz)}, and N ± σ would give ${f2(k0 - raiz)} to ${f2(k0 + raiz)}: with so few, Poisson is not symmetric and that ± falls short upwards.`) : '';
+      $('#ultimo', c).innerHTML = Lg(`<p>Último universo: contaste <b>N = ${k0}</b> Ia en seis semanas (T = ${tAnos} años), dentro del cubo (V = 10⁶ Mpc³).</p>
+        <p>Su tasa: N / (T·V) = ${k0} / (${tAnos} × 10⁶) = <b>${f2(k0 * kRate)}</b> × 10⁻⁴ yr⁻¹ Mpc⁻³.</p>
+        <p>Su barra (de Gehrels, a 1σ): con N = ${k0}, las medias verdaderas que pudieron darte ese conteo van de <b>${f2(g.lo)}</b> a <b>${f2(g.hi)}</b> Ia.
+        Divididas igual por T·V, la barra va de <b>${f2(g.lo * kRate)}</b> a <b>${f2(g.hi * kRate)}</b> × 10⁻⁴.${nSobre}</p>
         ${nU > 1 ? `<p>En tus ${nU} universos contaste entre <b>${Math.min(...cuentas)}</b> y <b>${Math.max(...cuentas)}</b>, en promedio <b>${f2(media)}</b>.</p>` : ''}`,
-        `<p>Last universe: you counted <b>${k0}</b> Ia in six weeks. Its rate is <b>${f2(k0 * kRate)}</b> × 10⁻⁴ yr⁻¹ Mpc⁻³,
-        with a 1σ Gehrels bar from <b>${f2(g.lo * kRate)}</b> to <b>${f2(g.hi * kRate)}</b>: −${f2((k0 - g.lo) * kRate)} downwards and +${f2((g.hi - k0) * kRate)} upwards.</p>
+        `<p>Last universe: you counted <b>N = ${k0}</b> Ia in six weeks (T = ${tAnos} years), inside the cube (V = 10⁶ Mpc³).</p>
+        <p>Its rate: N / (T·V) = ${k0} / (${tAnos} × 10⁶) = <b>${f2(k0 * kRate)}</b> × 10⁻⁴ yr⁻¹ Mpc⁻³.</p>
+        <p>Its bar (Gehrels, at 1σ): with N = ${k0}, the true means that could have given you that count go from <b>${f2(g.lo)}</b> to <b>${f2(g.hi)}</b> Ia.
+        Divided by T·V in the same way, the bar goes from <b>${f2(g.lo * kRate)}</b> to <b>${f2(g.hi * kRate)}</b> × 10⁻⁴.${nSobre}</p>
         ${nU > 1 ? `<p>In your ${nU} universes you counted between <b>${Math.min(...cuentas)}</b> and <b>${Math.max(...cuentas)}</b>, <b>${f2(media)}</b> on average.</p>` : ''}`);
+      $('#leyenda', c).innerHTML = nU >= 20
+        ? Lg(`Barras de la derecha: <b style="color:#6ee7a0">verde</b>, la barra contiene la media verdadera (la línea violeta); <b style="color:#ff6b6b">roja</b>, no la contiene. Van <b>${cubre}</b> verdes de ${nU} (${(100 * cubre / nU).toFixed(0)} %).`,
+          `Bars on the right: <b style="color:#6ee7a0">green</b>, the bar contains the true mean (the violet line). <b style="color:#ff6b6b">Red</b>, it does not. So far <b>${cubre}</b> green out of ${nU} (${(100 * cubre / nU).toFixed(0)} %).`)
+        : Lg(`A los 20 universos se revela la media verdadera, y cada barra se pinta de verde si la contiene o de rojo si no.`, `At 20 universes the true mean is revealed, and each bar turns green if it contains it or red if it does not.`);
       if (desde === 0) {
         const g0 = F.gehrels(cuentas[0]);
         E.ejemplos.poisson = Lg(`con N = ${cuentas[0]}, el intervalo de Gehrels a 1σ fue [${f2(g0.lo)}, ${f2(g0.hi)}] supernovas, que divididas por la exposición dan [${f2(g0.lo * kRate)}, ${f2(g0.hi * kRate)}] × 10⁻⁴.`,
@@ -340,8 +359,8 @@ const Misiones = (() => {
       }
       // lo que dicen los personajes en cada hito, una sola vez (si saltas varios hitos de una, se dicen juntos)
       const lineas = [], hito = (clave, ls) => { if (!dichos.has(clave)) { dichos.add(clave); lineas.push(...ls); } };
-      hito('1', [['operador', Lg(`Contaste ${k0}. A la derecha está tu tasa con su barra de error. Mira los números: la barra es más larga hacia arriba que hacia abajo.`,
-        `You counted ${k0}. On the right is your rate with its error bar. Look at the numbers: the bar is longer upwards than downwards.`)],
+      hito('1', [['operador', Lg(`Contaste ${k0}. A la derecha está tu tasa con su barra de error, y debajo del gráfico te dejo la cuenta de dónde sale. Fíjate: la barra es más larga hacia arriba que hacia abajo.`,
+        `You counted ${k0}. On the right is your rate with its error bar, and below the plot I left you the arithmetic of where it comes from. Notice: the bar is longer upwards than downwards.`)],
         ['operador', Lg('Ahora repite el mismo universo. Mismas leyes, otra suerte: fíjate si sale el mismo número.', 'Now repeat the same universe. Same laws, different luck. See whether you get the same number.')]]);
       if (nU >= 3) { $('#diez', c).hidden = false;
         hito('3', [['directora', Lg('Cada universo da otro N, aunque las leyes son las mismas. Esa dispersión es el ruido de Poisson.', 'Each universe gives a different N, even though the laws are the same. That scatter is Poisson noise.')],

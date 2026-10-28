@@ -2,13 +2,28 @@
 const Cuaderno = (() => {
   const PAGINAS = [
     {
-      id: 'tasa', titulo: Lg('La tasa', 'The rate'), ingles: 'volumetric rate',
+      id: 'contar', titulo: Lg('Contar', 'Counting'), ingles: 'rate',
+      ecuacion: String.raw`r_\mathrm{gal} = \frac{N}{T}`,
+      etiqueta: Lg('la definición de tasa, en una sola galaxia. La tesis mide la tasa por volumen (página siguiente)',
+        'the definition of a rate, in a single galaxy. The thesis measures the rate per volume (next page)'),
+      texto: [
+        Lg('Una tasa es cuántas supernovas explotan por unidad de tiempo. En una galaxia basta contar las N explosiones que viste durante T años y dividir.',
+          'A rate is how many supernovae explode per unit time. In one galaxy you only need to count the N explosions you saw during T years and divide.'),
+        Lg('En una galaxia como la Vía Láctea son unas pocas por siglo. Hay que mirar siglos para contar unas pocas, y con tan pocas el número que sale depende mucho de la suerte.',
+          'In a galaxy like the Milky Way there are a few per century. You have to watch for centuries to count a few, and with so few the number you get depends a lot on luck.'),
+        Lg('Además, lo que da una galaxia depende de su tamaño y de sus estrellas. Para hablar del universo se divide también por el volumen que se mira: la tasa por volumen, la página siguiente.',
+          'Besides, what one galaxy gives depends on its size and its stars. To talk about the universe you also divide by the volume you watch: the rate per volume, on the next page.'),
+      ],
+      fuente: Lg('Definición general. La tesis mide la tasa por volumen: sec:intro:rates.', 'General definition. The thesis measures the rate per volume: sec:intro:rates.'),
+    },
+    {
+      id: 'tasa', titulo: Lg('La tasa por volumen', 'The rate per volume'), ingles: 'volumetric rate',
       ecuacion: String.raw`r = \frac{N}{T\,V}`,
       etiqueta: Lg('sin ecuación numerada en la tesis: es la definición del texto de sec:intro:rates. Su forma con tiempo de control es eq:intro:ratez',
         'no numbered equation in the thesis: it is the definition given in the text of sec:intro:rates. Its control-time form is eq:intro:ratez'),
       texto: [
-        Lg('Una tasa volumétrica cuenta cuántas supernovas explotan por unidad de tiempo y por unidad de volumen de universo.',
-          'A volumetric rate counts how many supernovae explode per unit time and per unit volume of the universe.'),
+        Lg('Una galaxia sola no dice nada del universo. La tasa volumétrica cuenta cuántas supernovas explotan por unidad de tiempo y por unidad de volumen de universo, mirando miles de galaxias a la vez.',
+          'One galaxy alone tells you nothing about the universe. The volumetric rate counts how many supernovae explode per unit time and per unit volume of the universe, watching thousands of galaxies at once.'),
         Lg('N es el número de supernovas, T el tiempo y V el volumen comóvil (comoving volume), el volumen que no crece con la expansión.',
           'N is the number of supernovae, T the time and V the comoving volume, the volume that does not grow with the expansion.'),
         Lg('El tiempo es el de la supernova, en su reposo (rest-frame). Hasta z ~ 0.05 da casi lo mismo, pero lejos importa: lo ves en el capítulo 1.',
@@ -28,8 +43,12 @@ const Cuaderno = (() => {
       texto: [
         Lg('Las explosiones son independientes y al azar. Si repites el mismo universo, N cambia de una vez a otra: sigue una distribución de Poisson.',
           'The explosions are independent and random. If you repeat the same universe, N changes from one time to the next: it follows a Poisson distribution.'),
-        Lg('Con N grande, el error es √N. Con N chico la barra es asimétrica: con N = 3, el intervalo a 1σ va de 1.37 a 5.92, no de 1.27 a 4.73.',
-          'With large N, the error is √N. With small N the bar is asymmetric: with N = 3, the 1σ interval goes from 1.37 to 5.92, not from 1.27 to 4.73.'),
+        Lg('En una distribución de Poisson la varianza es igual a la media. Por eso la desviación estándar, el σ, es √N: si contaste N = 100, el error es ±10, un 10 %. Con N = 4 es ±2, un 50 %: contar más achica el error relativo como 1/√N.',
+          'In a Poisson distribution the variance equals the mean. That is why the standard deviation, the σ, is √N: if you counted N = 100, the error is ±10, 10 %. With N = 4 it is ±2, 50 %: counting more shrinks the relative error as 1/√N.'),
+        Lg('Con N chico eso deja de servir: la distribución de Poisson ya no es simétrica (no puede bajar de 0) y N ± √N no describe bien el error. Con N = 3 daría de 1.27 a 4.73. Por eso, en vez de un σ, se da un intervalo: el rango de medias verdaderas que pudieron haberte dado ese N.',
+          'With small N that stops working: the Poisson distribution is no longer symmetric (it cannot go below 0) and N ± √N does not describe the error well. With N = 3 it would give 1.27 to 4.73. So instead of a σ you give an interval: the range of true means that could have given you that N.'),
+        Lg('"A 1σ" quiere decir con la misma probabilidad que ±1σ de una gaussiana. La cota de arriba es la media que daría N o menos solo un 15.9 % de las veces, y la de abajo, la que daría N o más solo un 15.9 % de las veces. Con N = 3 el intervalo va de 1.37 a 5.92: más largo hacia arriba.',
+          '"At 1σ" means with the same probability as ±1σ of a Gaussian. The upper limit is the mean that would give N or fewer only 15.9 % of the time, and the lower one, the mean that would give N or more only 15.9 % of the time. With N = 3 the interval goes from 1.37 to 5.92: longer upwards.'),
         Lg('Con N chico la barra de Gehrels es conservadora: como N solo toma valores enteros, contiene la verdad más del 68 % de las veces (cerca del 80 % con medias de 2 a 4). Con N grande vuelve al 68 %.',
           'With small N the Gehrels bar is conservative: since N only takes integer values, it contains the truth more than 68 % of the time (close to 80 % for means from 2 to 4). With large N it goes back to 68 %.'),
         Lg('Gehrels (1986) da esas cotas. La tesis usa su intervalo a 1σ sobre el N total de cada bin, y lo divide por la exposición igual que N.',
@@ -119,7 +138,7 @@ const Cuaderno = (() => {
 
   // El árbol de instrumentos (diseño, sección 5.2): cada nodo es un término o una herramienta de la cadena de la tasa.
   const ARBOL = [
-    ['tasa', Lg('Contar', 'Counting')], ['tiempo_control', Lg('Tiempo de control', 'Control time')], ['volumen', Lg('Volumen', 'Volume')], ['dilatacion', '(1+z)'],
+    ['contar', Lg('Contar', 'Counting')], ['tasa', Lg('Tasa por volumen', 'Rate per volume')], ['tiempo_control', Lg('Tiempo de control', 'Control time')], ['volumen', Lg('Volumen', 'Volume')], ['dilatacion', '(1+z)'],
     ['eficiencia', Lg('Eficiencia de búsqueda', 'Search efficiency')], ['montecarlo', Lg('Simulación Monte Carlo', 'Monte Carlo simulation')], ['lf', Lg('Función de luminosidad', 'Luminosity function')],
     ['polvo', Lg('Polvo', 'Dust')], ['subtipos', Lg('Subtipos', 'Subtypes')], ['kcorr', Lg('K-corrección', 'K-correction')], ['simetria', Lg('Selección simétrica', 'Symmetric selection')],
     ['clasificador', Lg('Clasificador', 'Classifier')], ['prior', 'Prior P1(z)'], ['errorz', Lg('Error del z', 'Redshift error')], ['completitud', Lg('Completitud', 'Completeness')],
